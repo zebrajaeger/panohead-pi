@@ -24,6 +24,7 @@ import {MotionComponent} from './content/motion/motion.component';
 import {NumberDialogComponent} from './ui/number-dialog/number-dialog.component';
 import { PictureOverlapComponent } from './content/picture/picture-overlap/picture-overlap.component';
 import {WsService} from './sandbox/ws.service';
+import { JoystickComponent } from './content/tools/joystick/joystick.component';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import {WsService} from './sandbox/ws.service';
     MotionComponent,
     NumberDialogComponent,
     PictureOverlapComponent,
+    JoystickComponent,
   ],
   imports: [
     BrowserModule,

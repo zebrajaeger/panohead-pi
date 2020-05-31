@@ -13,8 +13,30 @@ export interface Shot {
   triggerTime: number;
 }
 
+// status
+export interface Axis {
+  isAtPosition: boolean;
+  position: number;
+}
+
+export interface Actor {
+  x: Axis;
+  y: Axis;
+}
+
+export interface Joystick {
+  x: number;
+  y: number;
+}
+
+export interface Status {
+  actor: Actor;
+  joystick: Joystick;
+}
+
 const TIMING = 'timing';
 const SHOTS = 'shots';
+const STATUS = 'status';
 
 @Injectable({
   providedIn: 'root'
@@ -25,15 +47,17 @@ export class WsService {
 
   public timing: ClientValue<Timing>;
   public shots: ClientValue<Shot[]>;
+  public status: ClientValue<Status>;
 
   private isInitialized = false;
   private initializerCallbacks: (() => void)[] = [];
 
   constructor() {
-    this.client = new Client('ws://localhost:8081');
+    this.client = new Client('ws://192.168.178.68:8081');
     this.client.on('open', () => {
       this.timing = new ClientValue<Timing>(this.client, TIMING);
       this.shots = new ClientValue<Shot[]>(this.client, SHOTS);
+      this.status = new ClientValue<Status>(this.client, STATUS);
       this.sendInitialized();
     });
   }

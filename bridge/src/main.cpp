@@ -21,9 +21,6 @@ enum command_t
     writeVelocity = 20,
     writePos = 21,
 
-    readPos = 50,
-    readIsMoving = 51,
-
     unknown = 127
 };
 
@@ -157,12 +154,17 @@ void loop()
 void requestEvent()
 // -----------------------------------------------------------------------------
 {
+    //u32_t  v;
+    //v.uint32 = 0x01020304;
+    //Serial.print(stepperDriver.getPos(0).uint32, HEX);
+    //WireUtils::write24(v);            // 3
     WireUtils::write24(stepperDriver.getPos(0));            // 3
     WireUtils::write24(stepperDriver.getPos(1));            // 3
     WireUtils::write8(stepperDriver.getIsAtTargetPos().u8); // 1
     WireUtils::write16(joystick.x.pos);                     // 2
     WireUtils::write16(joystick.y.pos);                     // 2
-    Serial.println(stepperDriver.getPos(1).int32);
+    //Serial.println(stepperDriver.getPos(1).int32);
+    //Serial.print(stepperDriver.getPos(0).uint32, HEX);
 }
 
 // -----------------------------------------------------------------------------
@@ -192,7 +194,7 @@ void receiveEvent(int howMany)
             if (WireUtils::read24(u32))
             {
                 Serial.println(u32.int32);
-                //Serial.println(u32.int32,HEX);
+                Serial.println(u32.int32,HEX);
                 stepperDriver.setPos(axis_, u32);
             }
             else
@@ -247,22 +249,6 @@ void receiveEvent(int howMany)
             {
                 Serial.println("; NOT ENOUGH DATA");
             }
-        }
-        break;
-
-        case readPos:
-        {
-            Serial.print("receiveEvent: readPos; axis: ");
-            Serial.println(axis_);
-            // nothing to do. the point is preparing command_ and axis_ for next read command
-        }
-        break;
-
-        case readIsMoving:
-        {
-            Serial.print("receiveEvent: readIsMoving; axis: ");
-            Serial.println(axis_);
-            // nothing to do. the point is preparing command_ and axis_ for next read command
         }
         break;
 

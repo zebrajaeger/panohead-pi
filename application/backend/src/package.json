@@ -5,8 +5,7 @@
   "main": "build/app.js",
   "scripts": {
     "tsc": "tsc",
-    "dev-w": "ts-node-dev --respawn --transpileOnly ./app.ts",
-    "dev-pi": "nodemon",
+    "develop": "ts-node-dev --respawn --transpileOnly ./app.ts",
     "prod": "tsc && node ./build/app.js",
     "i": "yarn install"
   },

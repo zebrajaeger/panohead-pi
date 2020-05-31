@@ -1,9 +1,31 @@
+import {Server} from 'rpc-websockets';
+import {ServerValue} from '@zebrajaeger/ws-value';
+import {openSync} from 'i2c-bus';
+import {Bridge, Status} from './bridge';
+
+const server = new Server({port: 8081, host: '0.0.0.0'});
+const STATUS = 'status';
+let svStatus = new ServerValue<Status>(server, STATUS);
+
+let i2c = openSync(1);
+
+let bridge = new Bridge(i2c, 0x45);
+setInterval(() => {
+    let status = bridge.readStatus();
+    svStatus.setValue(status);
+    //console.log('status', status);
+}, 20);
+
+
+//bridge.writePos(0, -2000);
+bridge.writeVelocity(0, 100);
+
 // import {Server} from 'rpc-websockets';
 // import {ServerValue} from '@zebrajaeger/ws-value';
 // import Configstore from 'configstore';
 
-import {openSync} from 'i2c-bus';
 
+/*
 enum Commands {
     writeLimit = 0,
 
@@ -25,7 +47,7 @@ const i2c = openSync(1);
 i2cSend([Commands.writePos, 123]);
 
 i2c.closeSync();
-
+*/
 
 // const config = new Configstore('test');
 // console.log(config.get('foo'));

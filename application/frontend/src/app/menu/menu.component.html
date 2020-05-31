@@ -1,17 +1,28 @@
 <div class="menu">
+
+  <!-- picture -->
   <button mat-button [matMenuTriggerFor]="picMenu">Picture</button>
   <mat-menu #picMenu="matMenu" yPosition="above">
     <button mat-menu-item>FOV</button>
     <button mat-menu-item routerLink="/picture/overlap" routerLinkActive="active">Overlap</button>
   </mat-menu>
 
+  <!-- shots -->
   <button mat-button routerLink="/shots" routerLinkActive="active">Shots</button>
 
+  <!-- motion -->
   <button mat-button routerLink="/motion" routerLinkActive="active">Motion</button>
 
+  <!-- pano -->
   <button mat-button [matMenuTriggerFor]="panoMenu">Pano</button>
   <mat-menu #panoMenu="matMenu" yPosition="above">
     <button mat-menu-item>FOV</button>
     <button mat-menu-item>Take Pano</button>
+  </mat-menu>
+
+  <!-- Joystick -->
+  <button mat-button [matMenuTriggerFor]="toolsMenu">Tools</button>
+  <mat-menu #toolsMenu="matMenu" yPosition="above">
+    <button mat-menu-item routerLink="/tools/joystick" routerLinkActive="active">Joystick</button>
   </mat-menu>
 </div>
