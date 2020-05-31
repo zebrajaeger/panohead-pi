@@ -1,0 +1,20 @@
+<!--<mat-card class="card">-->
+  <div class="seconds-spinner">
+    <div class="digits">
+      <div class="spinner" *ngFor="let i of decimals | numberArray:true ">
+        <app-digit-spinner [exponent]="i" (digitChange)="onDigitChange($event)"></app-digit-spinner>
+      </div>
+    </div>
+    <div class="fractions" *ngIf="fractions>0">
+      <div class="spinner dot-spinner">
+        <div class="dot">.</div>
+      </div>
+      <div class="spinner" *ngFor="let i of fractions | numberArray">
+        <app-digit-spinner [exponent]="-i-1" (digitChange)="onDigitChange($event)"></app-digit-spinner>
+      </div>
+    </div>
+    <div class="spinner label-spinner">
+      <div class="label">{{unit}}</div>
+    </div>
+  </div>
+<!--</mat-card>-->

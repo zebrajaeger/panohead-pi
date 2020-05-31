@@ -1,0 +1,29 @@
+<mat-card>
+  <mat-card-content>
+    <table>
+      <tr>
+        <td>Delay after move:</td>
+        <td>
+<!--          <button mat-button (click)="editDelayAfterMove()">{{delayAfterMove.toFixed(1)}} s</button>-->
+          <button mat-button (click)="editDelayAfterMove()">{{wsService.timing?.getValue()?.delayAfterMove.toFixed(1)}} s</button>
+        </td>
+      </tr>
+
+      <tr>
+        <td>Delay between shots:</td>
+        <td>
+<!--          <button mat-button (click)="editDelayBetweenShots()">{{delayBetweenShots.toFixed(1)}} s</button>-->
+          <button mat-button (click)="editDelayBetweenShots()">{{wsService.timing?.getValue()?.delayBetweenShots.toFixed(1)}} s</button>
+        </td>
+      </tr>
+      <tr>
+        <td>Delay after last shot:</td>
+        <td>
+<!--          <button mat-button (click)="editDelayAfterLastShot()">{{delayAfterLastShot.toFixed(1)}} s</button>-->
+          <button mat-button (click)="editDelayAfterLastShot()">{{wsService.timing?.getValue()?.delayAfterLastShot.toFixed(1)}} s</button>
+        </td>
+      </tr>
+    </table>
+  </mat-card-content>
+</mat-card>
+

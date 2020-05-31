@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/app.js",
+  "scripts": {
+    "tsc": "tsc",
+    "dev-w": "ts-node-dev --respawn --transpileOnly ./app.ts",
+    "dev-pi": "nodemon",
+    "prod": "tsc && node ./build/app.js",
+    "i": "yarn install"
+  },
+  "author": "Lars Brandt",
+  "license": "LGPL-3.0-or-later",
+  "dependencies": {
+    "@types/configstore": "^4.0.0",
+    "@zebrajaeger/ws-value": "1.0.7",
+    "configstore": "^5.0.1",
+    "exit-hook": "latest",
+    "i2c-bus": "5.1.0",
+    "@types/i2c-bus": "5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "typescript": "^3.9.3"
+  }
+}

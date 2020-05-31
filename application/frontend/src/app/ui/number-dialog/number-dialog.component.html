@@ -1,0 +1,5 @@
+<app-seconds-spinner [(value)]="data" fractions="1" [decimals]="3"></app-seconds-spinner>
+<div mat-dialog-actions class="buttons">
+  <button mat-raised-button  (click)="onNoClick()">Cancel</button>
+  <button mat-raised-button color="warn" [mat-dialog-close]="data" cdkFocusInitial>Save</button>
+</div>

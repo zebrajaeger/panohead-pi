@@ -1,0 +1,17 @@
+<div class="menu">
+  <button mat-button [matMenuTriggerFor]="picMenu">Picture</button>
+  <mat-menu #picMenu="matMenu" yPosition="above">
+    <button mat-menu-item>FOV</button>
+    <button mat-menu-item routerLink="/picture/overlap" routerLinkActive="active">Overlap</button>
+  </mat-menu>
+
+  <button mat-button routerLink="/shots" routerLinkActive="active">Shots</button>
+
+  <button mat-button routerLink="/motion" routerLinkActive="active">Motion</button>
+
+  <button mat-button [matMenuTriggerFor]="panoMenu">Pano</button>
+  <mat-menu #panoMenu="matMenu" yPosition="above">
+    <button mat-menu-item>FOV</button>
+    <button mat-menu-item>Take Pano</button>
+  </mat-menu>
+</div>

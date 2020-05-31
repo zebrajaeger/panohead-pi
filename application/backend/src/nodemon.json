@@ -1,0 +1,9 @@
+{
+  "verbose": false,
+  "ignore": [
+    "*.js",
+    "*.test.ts"
+  ],
+  "exec": "tsc && node ./build/app.js",
+  "ext": "ts,json"
+}

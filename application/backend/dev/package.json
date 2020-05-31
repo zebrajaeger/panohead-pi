@@ -1,0 +1,21 @@
+{
+  "name": "ph2-dev",
+  "version": "1.0.0",
+  "description": "develop on remote pi",
+  "main": "index.js",
+  "scripts": {
+    "d": "remote-code pi@192.168.178.68 --verbose --identity-file id_rsa --target /tmp/ph2 --source ../src --install-cmd \"yarn install\" --start-cmd \"ls\"",
+    "x": "remote-code pi@ph --identity-file ~/.ssh/id_rsa --verbose --target /tmp/xx --source ../src --install-cmd \"yarn install\" --start-cmd "\npm run nodemon\"",
+    "deploy": "rsync -v -azd --rsh=\"ssh -i id_rsa -p 22\" --delete --exclude=.git/ ../src/ pi@192.168.178.68:/home/pi/ph2",
+    "reboot": "ssh -i id_rsa -p 22 pi@192.168.178.67 \"sudo reboot\"",
+    "pm2start": "ssh -i id_rsa -p 22 pi@192.168.178.67 \"pm2 start /home/pi/picam/index.js --name ph2\"",
+    "pm2delete": "ssh -i id_rsa -p 22 pi@192.168.178.67 \"pm2 ph2\"",
+    "pm2save": "ssh -i id_rsa -p 22 pi@192.168.178.67 \"pm2 save\"",
+    "pm2reload": "ssh -i id_rsa -p 22 pi@192.168.178.67 \"pm2 reload ph2\""
+  },
+  "author": "Lars Brandt",
+  "license": "LGPL-3.0-or-later",
+  "devDependencies": {
+    "remote-code": "^1.0.1"
+  }
+}

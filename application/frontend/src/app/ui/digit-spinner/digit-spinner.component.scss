@@ -1,0 +1,19 @@
+.button {
+  min-width: 40px;
+  padding: 0;
+  height: 40px;
+}
+
+.value {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  div {
+    text-align: center;
+    font-size: 35px;
+    font-weight: bolder;
+  }
+}
