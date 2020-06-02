@@ -9,10 +9,33 @@ class WireUtils
 {
 public:
     // -----------------------------------------------------------------------------
-    static bool read24(u32_t &value)
+    static bool read8(u8_t &value)
+    // -----------------------------------------------------------------------------
+    {
+        if (Wire.available() >= 1)
+        {
+            uint8_t res = Wire.readBytes(&value.bytes[0], 1);
+            return res == 1;
+        }
+        return false;
+    }
+    // -----------------------------------------------------------------------------
+    static bool read16(u16_t &value)
     // -----------------------------------------------------------------------------
     {
         if (Wire.available() >= 2)
+        {
+            uint8_t res = Wire.readBytes(&value.bytes[0], 2);
+            return res == 1;
+        }
+        return false;
+    }
+
+    // -----------------------------------------------------------------------------
+    static bool read24(u32_t &value)
+    // -----------------------------------------------------------------------------
+    {
+        if (Wire.available() >= 3)
         {
             value.bytes[3] = 0;
             uint8_t res = Wire.readBytes(&value.bytes[0], 3);
@@ -25,7 +48,7 @@ public:
     static bool read32(u32_t &value)
     // -----------------------------------------------------------------------------
     {
-        if (Wire.available() >= 3)
+        if (Wire.available() >= 4)
         {
             uint8_t res = Wire.readBytes(&value.bytes[0], 4);
             return res == 4;
@@ -37,7 +60,7 @@ public:
     static bool read64(u64_t &value)
     // -----------------------------------------------------------------------------
     {
-        if (Wire.available() >= 7)
+        if (Wire.available() >= 8)
         {
             uint8_t res = Wire.readBytes(&value.bytes[0], 8);
             return res == 8;

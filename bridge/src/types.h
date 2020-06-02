@@ -27,3 +27,10 @@ typedef union {
     int64_t int64;
     uint8_t bytes[8];
 } u64_t;
+
+
+typedef struct
+{
+    boolean focus : 1;
+    boolean trigger : 1;
+} Camera_t;

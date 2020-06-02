@@ -105,18 +105,18 @@ public:
     }
 
     //------------------------------------------------------------------------------
-    void setVelocity(uint8_t axisIndex, const u32_t &value)
+    void setVelocity(u8_t axisIndex, const u32_t &value)
     //------------------------------------------------------------------------------
     {
-        tmc429_.setVelocityMode(axisIndex);
-        tmc429_.setTargetVelocityInHz(axisIndex, value.int32);
+        tmc429_.setVelocityMode(axisIndex.uint8);
+        tmc429_.setTargetVelocityInHz(axisIndex.uint8, value.int32);
     }
 
     //------------------------------------------------------------------------------
-    void setLimit(uint8_t axisIndex, const Limit_t &limit)
+    void setLimit(u8_t axisIndex, const Limit_t &limit)
     //------------------------------------------------------------------------------
     {
-        tmc429_.setLimitsInHz(axisIndex, limit.velocityMinHz, limit.velocityMaxHz, limit.acceleration_max_hz_per_s);
+        tmc429_.setLimitsInHz(axisIndex.uint8, limit.velocityMinHz, limit.velocityMaxHz, limit.acceleration_max_hz_per_s);
     }
 
     //------------------------------------------------------------------------------

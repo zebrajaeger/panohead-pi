@@ -38,3 +38,12 @@
 #define LED_JOYSTICK_PIN 5
 #endif
 
+// Camera
+#ifndef CAMERA_FOCUS_PIN
+#define CAMERA_FOCUS_PIN 6
+#endif
+
+#ifndef CAMERA_TRIGGER_PIN
+#define CAMERA_TRIGGER_PIN 7
+#endif
+

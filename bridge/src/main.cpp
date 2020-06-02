@@ -9,39 +9,158 @@
 #include "wireutils.h"
 #include "stepperdriver.h"
 
-void requestEvent();
-void receiveEvent(int howMany);
+#include "joystick.h"
+#include "camera.h"
 
-// W: <Index> <Value>
-// W: <Index> R: <Value>+
 enum command_t
 {
     writeLimit = 0,
-
     writeVelocity = 20,
     writePos = 21,
+
+    triggerCameraFocus = 30,
+    triggerCameraTrigger = 31,
 
     unknown = 127
 };
 
-typedef struct
-{
-    u16_t raw;
-    u16_t center;
-    u16_t backlash;
-    u16_t pos;
-} JoystickAxis_t;
-
-typedef struct
-{
-    JoystickAxis_t x;
-    JoystickAxis_t y;
-} Joystick_t;
-
 StepperDriver stepperDriver;
 command_t command_ = unknown;
-uint8_t axis_ = 0;
-Joystick_t joystick;
+
+Joystick joystick;
+Camera camera;
+
+// -----------------------------------------------------------------------------
+void requestEvent()
+// -----------------------------------------------------------------------------
+{
+    WireUtils::write24(stepperDriver.getPos(0));            // 3
+    WireUtils::write24(stepperDriver.getPos(1));            // 3
+    WireUtils::write8(stepperDriver.getIsAtTargetPos().u8); // 1
+    WireUtils::write16(joystick.getX().pos);                // 2
+    WireUtils::write16(joystick.getY().pos);                // 2
+    WireUtils::write8(camera.getStatus().u8);               // 1
+}
+
+// -----------------------------------------------------------------------------
+void onWritePos()
+// -----------------------------------------------------------------------------
+{
+    u8_t axis;
+    u32_t pos;
+    if (WireUtils::read8(axis) && WireUtils::read24(pos))
+    {
+        stepperDriver.setPos(axis.uint8, pos);
+    }
+    else
+    {
+        Serial.println("; NOT ENOUGH DATA");
+    }
+}
+// -----------------------------------------------------------------------------
+void onWriteVelocity()
+// -----------------------------------------------------------------------------
+{
+    u8_t axis;
+    u32_t velocity;
+    if (WireUtils::read8(axis) && WireUtils::read24(velocity))
+    {
+        stepperDriver.setVelocity(axis, velocity);
+    }
+    else
+    {
+        Serial.println("; NOT ENOUGH DATA");
+    }
+}
+// -----------------------------------------------------------------------------
+void onWriteLimit()
+// -----------------------------------------------------------------------------
+{
+    u8_t axis;
+    u32_t velocityMinHz;
+    u32_t velocityMaxHz;
+    u32_t accelerationMaxHzPerSecond;
+
+    if (WireUtils::read8(axis) && WireUtils::read32(velocityMinHz) && WireUtils::read32(velocityMaxHz) && WireUtils::read32(accelerationMaxHzPerSecond))
+    {
+        StepperDriver::Limit_t limit;
+        limit.velocityMinHz = velocityMinHz.uint32;
+        limit.velocityMaxHz = velocityMaxHz.uint32;
+        limit.acceleration_max_hz_per_s = accelerationMaxHzPerSecond.uint32;
+        stepperDriver.setLimit(axis, limit);
+    }
+    else
+    {
+        Serial.println("; NOT ENOUGH DATA");
+    }
+}
+// -----------------------------------------------------------------------------
+void onTriggerCameraFocus()
+// -----------------------------------------------------------------------------
+{
+    u32_t ms;
+    if (WireUtils::read24(ms))
+    {
+        camera.startFocus(ms);
+    }
+}
+// -----------------------------------------------------------------------------
+void onTriggerCameraTrigger()
+// -----------------------------------------------------------------------------
+{
+    u32_t ms;
+    if (WireUtils::read24(ms))
+    {
+        camera.startTrigger(ms);
+    }
+}
+
+// -----------------------------------------------------------------------------
+void receiveEvent(int howMany)
+// -----------------------------------------------------------------------------
+{
+    Serial.print("receiveEvent n:");
+    Serial.println(howMany);
+    /*for(uint8_t i=0; i<howMany; ++i){
+        Serial.print("  ");
+        Serial.println(Wire.read());
+    } */
+
+    u8_t temp;
+    if (WireUtils::read8(temp))
+    {
+        command_ = (command_t)temp.uint8;
+        switch (command_)
+        {
+        case writePos:
+            onWritePos();
+            break;
+        case writeVelocity:
+            onWriteVelocity();
+            break;
+        case writeLimit:
+            onWriteLimit();
+            break;
+        case triggerCameraFocus:
+            onTriggerCameraFocus();
+            break;
+        case triggerCameraTrigger:
+            onTriggerCameraTrigger();
+            break;
+        default:
+        {
+            Serial.print("receiveEvent: UNKOWN COMMAND: ");
+            Serial.println(command_);
+        }
+        }
+    }
+
+    // remove all pending data because it would suppress next call of this function
+    while (Wire.available() > 0)
+    {
+        Wire.read();
+    }
+}
 
 // -----------------------------------------------------------------------------
 void setup()
@@ -103,35 +222,25 @@ void setup()
     }
 
     // Joystick
-    analogReference(DEFAULT);
-    joystick.x.pos.uint16 = 0;
-    joystick.y.pos.uint16 = 0;
-    joystick.x.backlash.uint16 = 1;
-    joystick.y.backlash.uint16 = 1;
-    joystick.x.center.uint16 = analogRead(JOYSTICK_X_PIN);
-    joystick.y.center.uint16 = analogRead(JOYSTICK_Y_PIN);
-}
-
-// -----------------------------------------------------------------------------
-bool calJoystickValue(JoystickAxis_t &axis, uint16_t newValue)
-// -----------------------------------------------------------------------------
-{
-    axis.raw.uint16 = newValue;
-    int16_t delta = newValue - axis.center.uint16;
-    if (delta > 0 && delta > axis.backlash.uint16)
+    if (joystick.setup(JOYSTICK_X_PIN, JOYSTICK_Y_PIN))
     {
-        axis.pos.int16 = map(newValue, axis.center.uint16, 1023, 0, 1000);
-        return true;
+        Serial.println("Joystick initialized");
+        joystick.calibrate();
+    }
+    else
+    {
+        Serial.println("ERROR: Joystick NOT initialized");
     }
 
-    if (delta < 0 && delta < -axis.backlash.int16)
+    //Camera
+    if (camera.setup(CAMERA_FOCUS_PIN, CAMERA_TRIGGER_PIN))
     {
-        axis.pos.int16 = map(newValue, 0, axis.center.uint16, -1000, 0);
-        return true;
+        Serial.println("Camera initialized");
     }
-
-    axis.pos.uint16 = 0;
-    return false;
+    else
+    {
+        Serial.println("ERROR: Camera NOT initialized");
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -139,130 +248,11 @@ void loop()
 // -----------------------------------------------------------------------------
 {
     stepperDriver.loop();
-    // Serial.println(stepperDriver.getPos(0).int32);
-    delay(100);
     digitalWrite(LED_MOVE_PIN_1, stepperDriver.isMoving(0));
     digitalWrite(LED_MOVE_PIN_2, stepperDriver.isMoving(1));
 
-    bool jogging = false;
-    jogging |= calJoystickValue(joystick.x, analogRead(JOYSTICK_X_PIN));
-    jogging |= calJoystickValue(joystick.y, analogRead(JOYSTICK_Y_PIN));
-    digitalWrite(LED_JOYSTICK_PIN, jogging);
-}
+    joystick.loop();
+    digitalWrite(LED_JOYSTICK_PIN, joystick.getIsJogging());
 
-// -----------------------------------------------------------------------------
-void requestEvent()
-// -----------------------------------------------------------------------------
-{
-    //u32_t  v;
-    //v.uint32 = 0x01020304;
-    //Serial.print(stepperDriver.getPos(0).uint32, HEX);
-    //WireUtils::write24(v);            // 3
-    WireUtils::write24(stepperDriver.getPos(0));            // 3
-    WireUtils::write24(stepperDriver.getPos(1));            // 3
-    WireUtils::write8(stepperDriver.getIsAtTargetPos().u8); // 1
-    WireUtils::write16(joystick.x.pos);                     // 2
-    WireUtils::write16(joystick.y.pos);                     // 2
-    //Serial.println(stepperDriver.getPos(1).int32);
-    //Serial.print(stepperDriver.getPos(0).uint32, HEX);
-}
-
-// -----------------------------------------------------------------------------
-void receiveEvent(int howMany)
-// -----------------------------------------------------------------------------
-{
-    Serial.print("receiveEvent n:");
-    Serial.println(howMany);
-    /*for(uint8_t i=0; i<howMany; ++i){
-        Serial.print("  ");
-        Serial.println(Wire.read());
-    } */
-
-    if (Wire.available() > 1)
-    {
-        command_ = (command_t)Wire.read();
-        axis_ = Wire.read();
-
-        switch (command_)
-        {
-        case writePos:
-        {
-            // Serial.print("receiveEvent: writePos; axis: ");
-            // Serial.print(axis_);
-            // Serial.print("; pos: ");
-            u32_t u32;
-            if (WireUtils::read24(u32))
-            {
-                Serial.println(u32.int32);
-                Serial.println(u32.int32,HEX);
-                stepperDriver.setPos(axis_, u32);
-            }
-            else
-            {
-                // Serial.println("!!!got no pos!!");
-            }
-        }
-        break;
-
-        case writeVelocity:
-        {
-            u32_t u32;
-            if (WireUtils::read24(u32))
-            {
-                // Serial.print("receiveEvent: writeVelocity; axis: ");
-                // Serial.print(axis_);
-                // Serial.println("; pos");
-                // Serial.println(u32.int32);
-
-                stepperDriver.setVelocity(axis_, u32);
-            }
-        }
-        break;
-
-        case writeLimit:
-        {
-            u32_t velocityMinHz;
-            u32_t velocityMaxHz;
-            u32_t accelerationMaxHzPerSecond;
-
-            Serial.print("receiveEvent: writeLimit; axis: ");
-            Serial.print(axis_);
-
-            if (WireUtils::read32(velocityMinHz) && WireUtils::read32(velocityMaxHz) && WireUtils::read32(accelerationMaxHzPerSecond))
-            {
-                Serial.print("; velocityMinHz: ");
-                Serial.print(velocityMinHz.int32);
-
-                Serial.print("; velocityMaxHz: ");
-                Serial.print(velocityMaxHz.int32);
-
-                Serial.print("; accelerationMaxHzPerSecond: ");
-                Serial.println(accelerationMaxHzPerSecond.int32);
-
-                StepperDriver::Limit_t limit;
-                limit.velocityMinHz = velocityMinHz.uint32;
-                limit.velocityMaxHz = velocityMaxHz.uint32;
-                limit.acceleration_max_hz_per_s = accelerationMaxHzPerSecond.uint32;
-                stepperDriver.setLimit(axis_, limit);
-            }
-            else
-            {
-                Serial.println("; NOT ENOUGH DATA");
-            }
-        }
-        break;
-
-        default:
-        {
-            Serial.print("receiveEvent: UNKOWN COMMAND: ");
-            Serial.println(command_);
-        }
-        }
-    }
-
-    // remove all pending data because it would suppress next call of this function
-    while (Wire.available() > 0)
-    {
-        Wire.read();
-    }
+    camera.loop();
 }
