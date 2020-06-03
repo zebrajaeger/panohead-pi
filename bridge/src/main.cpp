@@ -121,10 +121,12 @@ void receiveEvent(int howMany)
 {
     Serial.print("receiveEvent n:");
     Serial.println(howMany);
-    /*for(uint8_t i=0; i<howMany; ++i){
+    /*
+    for(uint8_t i=0; i<howMany; ++i){
         Serial.print("  ");
         Serial.println(Wire.read());
-    } */
+    } 
+    */
 
     u8_t temp;
     if (WireUtils::read8(temp))

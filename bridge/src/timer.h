@@ -5,43 +5,37 @@
 class Timer
 {
 public:
-    typedef void (*Callback_t)();
+    Timer() : isRunning_(false), durationMs_(0), nextEventTime_(0) {}
 
-    Timer() : isRunnung_(false), durationMs_(0), nextEventTime_(0), callback_(NULL) {}
-
-    void trigger(uint32_t durationMs)
+    virtual void trigger(uint32_t durationMs)
     {
         durationMs_ = durationMs;
-        isRunnung_ = true;
+        isRunning_ = true;
         nextEventTime_ = millis() + durationMs_;
     }
 
-    void onTimer(Callback_t callback)
-    {
-        callback_ = callback;
-    }
+    virtual void onTimer() = 0;
 
     bool isRunning()
     {
-        return isRunnung_;
+        return isRunning_;
     }
 
     void loop()
     {
-        uint32_t now = millis();
-        if (now >= nextEventTime_)
+        if (isRunning_)
         {
-            isRunnung_ = false;
-            if (callback_)
+            uint32_t now = millis();
+            if (now >= nextEventTime_)
             {
-                callback_();
+                isRunning_ = false;
+                onTimer();
             }
         }
     }
 
 private:
-    bool isRunnung_;
+    bool isRunning_;
     uint32_t durationMs_;
     uint32_t nextEventTime_;
-    Callback_t callback_;
 };

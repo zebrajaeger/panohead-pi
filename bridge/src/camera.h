@@ -4,6 +4,40 @@
 #include "types.h"
 #include "timer.h"
 
+class CameraTimer : public Timer
+{
+public:
+    CameraTimer() : Timer()
+    {
+    }
+
+    void setup(uint8_t ledPin)
+    {
+        Serial.print("SETUP TIMER ");
+        Serial.println(ledPin);
+        ledPin_ = ledPin;
+        pinMode(ledPin_, OUTPUT);
+    }
+
+    virtual void trigger(uint32_t durationMs)
+    {
+        Serial.print("START TIMER ");
+        Serial.println(durationMs);
+
+        Timer::trigger(durationMs);
+        digitalWrite(ledPin_, 1);
+    }
+
+    virtual void onTimer()
+    {
+        Serial.println("STOP TIMER");
+        digitalWrite(ledPin_, 0);
+    }
+
+private:
+    uint8_t ledPin_;
+};
+
 class Camera
 {
 public:
@@ -18,8 +52,9 @@ public:
 
     bool setup(uint8_t focusPin, uint8_t triggerPin)
     {
-        focusPin_ = focusPin;
-        triggerPin_ = triggerPin;
+        focusTimer_.setup(focusPin);
+        triggerTimer_.setup(triggerPin);
+
         return true;
     }
 
@@ -59,8 +94,6 @@ public:
     }
 
 private:
-    uint8_t focusPin_;
-    uint8_t triggerPin_;
-    Timer focusTimer_;
-    Timer triggerTimer_;
+    CameraTimer focusTimer_;
+    CameraTimer triggerTimer_;
 };
