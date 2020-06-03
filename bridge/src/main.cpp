@@ -280,7 +280,7 @@ void setup()
     if (eeprom.setup())
     {
         Serial.println("EEPROM initialized");
-        eeprom.dump();
+        //eeprom.dump();
     }
     else
     {
@@ -319,18 +319,11 @@ void setup()
         joystick.getXCalibration().min = eeprom.read16(Eeprom::JOYSTICK_X_MIN);
         joystick.getXCalibration().center = eeprom.read16(Eeprom::JOYSTICK_X_CENTER);
         joystick.getXCalibration().max = eeprom.read16(Eeprom::JOYSTICK_X_MAX);
-        Serial.println("x");
-        Serial.println(joystick.getXCalibration().min.uint16);
-        Serial.println(joystick.getXCalibration().center.uint16);
-        Serial.println(joystick.getXCalibration().max.uint16);
 
         joystick.getYCalibration().min = eeprom.read16(Eeprom::JOYSTICK_Y_MIN);
         joystick.getYCalibration().center = eeprom.read16(Eeprom::JOYSTICK_Y_CENTER);
-        joystick.getYCalibration().max = eeprom.read16(Eeprom::JOYSTICK_X_MAX);
-        Serial.println("y");
-        Serial.println(joystick.getXCalibration().min.uint16);
-        Serial.println(joystick.getXCalibration().center.uint16);
-        Serial.println(joystick.getXCalibration().max.uint16);
+        joystick.getYCalibration().max = eeprom.read16(Eeprom::JOYSTICK_Y_MAX);
+       
     }
     else
     {
