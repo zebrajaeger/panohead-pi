@@ -11,15 +11,20 @@
 
 #include "joystick.h"
 #include "camera.h"
+#include "eeprom.h"
 
 enum command_t
 {
-    writeLimit = 0,
-    writeVelocity = 20,
-    writePos = 21,
+    stepperWriteLimit = 0x20,
+    stepperWriteVelocity = 0x21,
+    stepperWritePos = 0x22,
 
-    triggerCameraFocus = 30,
-    triggerCameraTrigger = 31,
+    cameraStartFocus = 0x30,
+    cameraStartTrigger = 0x31,
+
+    joystickCalibrateAsTopLeft = 0x40,
+    joystickCalibrateAsCenter = 0x41,
+    joystickCalibrateAsBottomRight = 0x42,
 
     unknown = 127
 };
@@ -29,6 +34,7 @@ command_t command_ = unknown;
 
 Joystick joystick;
 Camera camera;
+Eeprom eeprom;
 
 // -----------------------------------------------------------------------------
 void requestEvent()
@@ -116,6 +122,69 @@ void onTriggerCameraTrigger()
 }
 
 // -----------------------------------------------------------------------------
+void onJoystickCalibrateAsTopLeft()
+// -----------------------------------------------------------------------------
+{
+    Serial.print("onJoystickCalibrateAsTopLeft()");
+
+    u16_t x = joystick.getX().raw;
+    joystick.getXCalibration().min = x;
+    eeprom.write16(Eeprom::JOYSTICK_X_MIN, x);
+    Serial.print(x.uint16);
+    Serial.print(" ");
+
+    u16_t y = joystick.getY().raw;
+    joystick.getYCalibration().min = y;
+    eeprom.write16(Eeprom::JOYSTICK_Y_MIN, y);
+    Serial.print(y.uint16);
+    Serial.println();
+
+    eeprom.recalculateAndWriteCRC();
+}
+
+// -----------------------------------------------------------------------------
+void onJoystickCalibrateAsCenter()
+// -----------------------------------------------------------------------------
+{
+    Serial.print("onJoystickCalibrateAsCenter()");
+
+    u16_t x = joystick.getX().raw;
+    joystick.getXCalibration().center = x;
+    eeprom.write16(Eeprom::JOYSTICK_X_CENTER, x);
+    Serial.print(x.uint16);
+    Serial.print(" ");
+
+    u16_t y = joystick.getY().raw;
+    joystick.getYCalibration().center = y;
+    eeprom.write16(Eeprom::JOYSTICK_Y_CENTER, y);
+    Serial.print(y.uint16);
+    Serial.println();
+
+    eeprom.recalculateAndWriteCRC();
+}
+
+// -----------------------------------------------------------------------------
+void onJoystickCalibrateAsBottomRight()
+// -----------------------------------------------------------------------------
+{
+    Serial.print("onJoystickCalibrateAsBottomRight()");
+
+    u16_t x = joystick.getX().raw;
+    joystick.getXCalibration().max = x;
+    eeprom.write16(Eeprom::JOYSTICK_X_MAX, x);
+    Serial.print(x.uint16);
+    Serial.print(" ");
+
+    u16_t y = joystick.getY().raw;
+    joystick.getYCalibration().max = y;
+    eeprom.write16(Eeprom::JOYSTICK_Y_MAX, y);
+    Serial.print(y.uint16);
+    Serial.println();
+
+    eeprom.recalculateAndWriteCRC();
+}
+
+// -----------------------------------------------------------------------------
 void receiveEvent(int howMany)
 // -----------------------------------------------------------------------------
 {
@@ -134,20 +203,29 @@ void receiveEvent(int howMany)
         command_ = (command_t)temp.uint8;
         switch (command_)
         {
-        case writePos:
-            onWritePos();
-            break;
-        case writeVelocity:
-            onWriteVelocity();
-            break;
-        case writeLimit:
+        case stepperWriteLimit:
             onWriteLimit();
             break;
-        case triggerCameraFocus:
+        case stepperWritePos:
+            onWritePos();
+            break;
+        case stepperWriteVelocity:
+            onWriteVelocity();
+            break;
+        case cameraStartFocus:
             onTriggerCameraFocus();
             break;
-        case triggerCameraTrigger:
+        case cameraStartTrigger:
             onTriggerCameraTrigger();
+            break;
+        case joystickCalibrateAsTopLeft:
+            onJoystickCalibrateAsTopLeft();
+            break;
+        case joystickCalibrateAsCenter:
+            onJoystickCalibrateAsCenter();
+            break;
+        case joystickCalibrateAsBottomRight:
+            onJoystickCalibrateAsBottomRight();
             break;
         default:
         {
@@ -169,19 +247,6 @@ void setup()
 // -----------------------------------------------------------------------------
 {
     Serial.begin(115200);
-
-    // LEDs
-    pinMode(LED_MOVE_PIN_1, OUTPUT);
-    digitalWrite(LED_MOVE_PIN_1, false);
-    pinMode(LED_MOVE_PIN_2, OUTPUT);
-    digitalWrite(LED_MOVE_PIN_2, false);
-    pinMode(LED_JOYSTICK_PIN, OUTPUT);
-    digitalWrite(LED_JOYSTICK_PIN, false);
-
-    // I²C
-    Wire.begin(I2C_ADDRESS);
-    Wire.onRequest(requestEvent);
-    Wire.onReceive(receiveEvent);
 
     // Fuses
     uint8_t lowBits = boot_lock_fuse_bits_get(GET_LOW_FUSE_BITS);
@@ -211,6 +276,30 @@ void setup()
         }
     }
 
+    // EEPROM
+    if (eeprom.setup())
+    {
+        Serial.println("EEPROM initialized");
+        eeprom.dump();
+    }
+    else
+    {
+        Serial.println("ERROR: EEPROM NOT initialized");
+    }
+
+    // LEDs
+    pinMode(LED_MOVE_PIN_1, OUTPUT);
+    digitalWrite(LED_MOVE_PIN_1, false);
+    pinMode(LED_MOVE_PIN_2, OUTPUT);
+    digitalWrite(LED_MOVE_PIN_2, false);
+    pinMode(LED_JOYSTICK_PIN, OUTPUT);
+    digitalWrite(LED_JOYSTICK_PIN, false);
+
+    // I²C
+    Wire.begin(I2C_ADDRESS);
+    Wire.onRequest(requestEvent);
+    Wire.onReceive(receiveEvent);
+
     // TMC429
     StepperDriver::Limit_t limit = {16 * 10, 200 * 16 * 7, 75000};
     StepperDriver::Limit_t limits[3] = {limit, limit, limit};
@@ -227,7 +316,21 @@ void setup()
     if (joystick.setup(JOYSTICK_X_PIN, JOYSTICK_Y_PIN))
     {
         Serial.println("Joystick initialized");
-        joystick.calibrate();
+        joystick.getXCalibration().min = eeprom.read16(Eeprom::JOYSTICK_X_MIN);
+        joystick.getXCalibration().center = eeprom.read16(Eeprom::JOYSTICK_X_CENTER);
+        joystick.getXCalibration().max = eeprom.read16(Eeprom::JOYSTICK_X_MAX);
+        Serial.println("x");
+        Serial.println(joystick.getXCalibration().min.uint16);
+        Serial.println(joystick.getXCalibration().center.uint16);
+        Serial.println(joystick.getXCalibration().max.uint16);
+
+        joystick.getYCalibration().min = eeprom.read16(Eeprom::JOYSTICK_Y_MIN);
+        joystick.getYCalibration().center = eeprom.read16(Eeprom::JOYSTICK_Y_CENTER);
+        joystick.getYCalibration().max = eeprom.read16(Eeprom::JOYSTICK_X_MAX);
+        Serial.println("y");
+        Serial.println(joystick.getXCalibration().min.uint16);
+        Serial.println(joystick.getXCalibration().center.uint16);
+        Serial.println(joystick.getXCalibration().max.uint16);
     }
     else
     {

@@ -13,7 +13,6 @@ public:
 
     void setup(uint8_t ledPin)
     {
-        Serial.print("SETUP TIMER ");
         Serial.println(ledPin);
         ledPin_ = ledPin;
         pinMode(ledPin_, OUTPUT);
@@ -21,7 +20,6 @@ public:
 
     virtual void trigger(uint32_t durationMs)
     {
-        Serial.print("START TIMER ");
         Serial.println(durationMs);
 
         Timer::trigger(durationMs);
@@ -30,7 +28,6 @@ public:
 
     virtual void onTimer()
     {
-        Serial.println("STOP TIMER");
         digitalWrite(ledPin_, 0);
     }
 

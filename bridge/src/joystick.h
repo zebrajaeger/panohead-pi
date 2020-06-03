@@ -6,11 +6,18 @@
 class Joystick
 {
 public:
-    class Axis
+    struct Calibration
     {
-    public:
-        u16_t raw;
+
+        u16_t min;
         u16_t center;
+        u16_t max;
+    };
+
+    struct Axis
+    {
+        Calibration calibration;
+        u16_t raw;
         u16_t backlash;
         u16_t pos;
     };
@@ -26,20 +33,10 @@ public:
         analogReference(DEFAULT);
         x_.pos.uint16 = 0;
         y_.pos.uint16 = 0;
-        x_.backlash.uint16 = 1;
-        y_.backlash.uint16 = 1;
-        x_.center.uint16 = 512;
-        y_.center.uint16 = 512;
+        x_.backlash.uint16 = 2;
+        y_.backlash.uint16 = 2;
 
         return true;
-    }
-
-    // -----------------------------------------------------------------------------
-    void calibrate()
-    // -----------------------------------------------------------------------------
-    {
-        x_.center.uint16 = analogRead(pinX_);
-        y_.center.uint16 = analogRead(pinY_);
     }
 
     // -----------------------------------------------------------------------------
@@ -52,24 +49,36 @@ public:
     }
 
     // -----------------------------------------------------------------------------
-    bool getIsJogging()
+    bool getIsJogging() const
     // -----------------------------------------------------------------------------
     {
         return isJogging_;
     }
 
     // -----------------------------------------------------------------------------
-    const Axis &getX()
+    const Axis &getX() const
     // -----------------------------------------------------------------------------
     {
         return x_;
     }
+    // -----------------------------------------------------------------------------
+    Calibration &getXCalibration()
+    // -----------------------------------------------------------------------------
+    {
+        return x_.calibration;
+    }
 
     // -----------------------------------------------------------------------------
-    const Axis &getY()
+    const Axis &getY() const
     // -----------------------------------------------------------------------------
     {
         return y_;
+    }
+    // -----------------------------------------------------------------------------
+    Calibration &getYCalibration()
+    // -----------------------------------------------------------------------------
+    {
+        return y_.calibration;
     }
 
 private:
@@ -78,16 +87,17 @@ private:
     // -----------------------------------------------------------------------------
     {
         axis.raw.uint16 = newValue;
-        int16_t delta = newValue - axis.center.uint16;
+        int16_t delta = newValue - axis.calibration.center.uint16;
+        //Serial.println(delta);
         if (delta > 0 && delta > axis.backlash.int16)
         {
-            axis.pos.int16 = map(newValue, axis.center.uint16, 1023, 0, 1000);
+            axis.pos.int16 = map(newValue, axis.calibration.center.uint16, axis.calibration.max.uint16, 0, 1000);
             return true;
         }
 
         if (delta < 0 && delta < -axis.backlash.int16)
         {
-            axis.pos.int16 = map(newValue, 0, axis.center.uint16, -1000, 0);
+            axis.pos.int16 = map(newValue, axis.calibration.min.uint16, axis.calibration.center.uint16, -1000, 0);
             return true;
         }
 
