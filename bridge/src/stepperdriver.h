@@ -37,7 +37,7 @@ public:
     StepperDriver() : tmc429_()
     //------------------------------------------------------------------------------
     {
-        memset(&status_, 0, sizeof (struct TMC429::Status));
+        memset(&status_, 0, sizeof(struct TMC429::Status));
     }
 
     //------------------------------------------------------------------------------
@@ -74,10 +74,46 @@ public:
         status_ = tmc429_.getStatus();
         steppers_[0].isMoving = !status_.at_target_position_0;
         steppers_[1].isMoving = !status_.at_target_position_1;
-        steppers_[2].isMoving = !status_.at_target_position_2;
-        for (uint8_t i = 0; i < 3; ++i)
+
+        steppers_[0].pos.uint32 = tmc429_.getActualPosition(0);
+        steppers_[1].pos.uint32 = tmc429_.getActualPosition(1);
+
+        // -----
+        if (cmd_velocity_axis_0_available)
         {
-            steppers_[i].pos.uint32 = tmc429_.getActualPosition(i);
+            //Serial.println("cmd_velocity_axis_0_available");
+            //Serial.println(cmd_velocity_axis_0_velocity.int32);
+            tmc429_.setVelocityMode(0);
+            tmc429_.setTargetVelocityInHz(0, cmd_velocity_axis_0_velocity.int32);
+            cmd_velocity_axis_0_available = false;
+        }
+
+        if (cmd_velocity_axis_1_available)
+        {
+            //Serial.print("cmd_velocity_axis_1_available: ");
+            //Serial.println(cmd_velocity_axis_1_velocity.int32);
+            tmc429_.setVelocityMode(1);
+            tmc429_.setTargetVelocityInHz(1, cmd_velocity_axis_1_velocity.int32);
+            cmd_velocity_axis_1_available = false;
+        }
+        // -----
+        if (cmd_pos_axis_0_available)
+        {
+            //Serial.println("cmd_pos_axis_0_available");
+            //Serial.println(cmd_pos_axis_0_pos.int32);
+            tmc429_.setSoftMode(0);
+            tmc429_.setTargetPosition(0, cmd_pos_axis_0_pos.int32);
+
+            cmd_pos_axis_0_available = false;
+        }
+
+        if (cmd_pos_axis_1_available)
+        {
+            //Serial.print("cmd_pos_axis_1_available: ");
+            //Serial.println(cmd_pos_axis_0_pos.int32);
+            tmc429_.setSoftMode(1);
+            tmc429_.setTargetPosition(1, cmd_pos_axis_0_pos.int32);
+            cmd_pos_axis_1_available = false;
         }
     }
 
@@ -97,19 +133,35 @@ public:
     }
 
     //------------------------------------------------------------------------------
-    void setPos(uint8_t axisIndex, const u32_t &value)
+    void setPos(u8_t axisIndex, const u32_t &value)
     //------------------------------------------------------------------------------
     {
-        tmc429_.setSoftMode(axisIndex);
-        tmc429_.setTargetPosition(axisIndex, value.int32);
+        if (axisIndex.uint8 == 0)
+        {
+            cmd_pos_axis_0_available = true;
+            cmd_pos_axis_0_pos.uint32 = value.uint32;
+        }
+        if (axisIndex.uint8 == 1)
+        {
+            cmd_pos_axis_1_available = true;
+            cmd_pos_axis_1_pos.uint32 = value.uint32;
+        }
     }
 
     //------------------------------------------------------------------------------
     void setVelocity(u8_t axisIndex, const u32_t &value)
     //------------------------------------------------------------------------------
     {
-        tmc429_.setVelocityMode(axisIndex.uint8);
-        tmc429_.setTargetVelocityInHz(axisIndex.uint8, value.int32);
+        if (axisIndex.uint8 == 0)
+        {
+            cmd_velocity_axis_0_available = true;
+            cmd_velocity_axis_0_velocity.uint32 = value.uint32;
+        }
+        if (axisIndex.uint8 == 1)
+        {
+            cmd_velocity_axis_1_available = true;
+            cmd_velocity_axis_1_velocity.uint32 = value.uint32;
+        }
     }
 
     //------------------------------------------------------------------------------
@@ -158,4 +210,16 @@ private:
     TMC429 tmc429_;
     Stepper_t steppers_[3];
     TMC429::Status status_;
+
+    // TODO refactor me
+    volatile bool cmd_velocity_axis_0_available;
+    volatile u32_t cmd_velocity_axis_0_velocity;
+    volatile bool cmd_pos_axis_0_available;
+    volatile u32_t cmd_pos_axis_0_pos;
+
+    // TODO refactor me
+    volatile bool cmd_velocity_axis_1_available;
+    volatile u32_t cmd_velocity_axis_1_velocity;
+    volatile bool cmd_pos_axis_1_available;
+    volatile u32_t cmd_pos_axis_1_pos;
 };

@@ -46,6 +46,12 @@ public:
         isJogging_ = false;
         isJogging_ |= calcJoystickValue(x_, analogRead(JOYSTICK_X_PIN));
         isJogging_ |= calcJoystickValue(y_, analogRead(JOYSTICK_Y_PIN));
+        /*
+        Serial.println("----");
+        Serial.println(x_.calibration.min.uint16);
+        Serial.println(x_.calibration.center.uint16);
+        Serial.println(x_.calibration.max.uint16);
+        */
     }
 
     // -----------------------------------------------------------------------------

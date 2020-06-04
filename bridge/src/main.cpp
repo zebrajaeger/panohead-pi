@@ -56,7 +56,7 @@ void onWritePos()
     u32_t pos;
     if (WireUtils::read8(axis) && WireUtils::read24(pos))
     {
-        stepperDriver.setPos(axis.uint8, pos);
+        stepperDriver.setPos(axis, pos);
     }
     else
     {
