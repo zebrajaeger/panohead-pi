@@ -30,7 +30,7 @@ public:
     {
         pinX_ = pinX;
         pinY_ = pinY;
-        analogReference(DEFAULT);
+        analogReference(EXTERNAL); // connect aref to 3.3V of joystick
         x_.pos.uint16 = 0;
         y_.pos.uint16 = 0;
         x_.backlash.uint16 = 2;

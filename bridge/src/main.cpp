@@ -323,8 +323,7 @@ void setup()
         joystick.getYCalibration().min = eeprom.read16(Eeprom::JOYSTICK_Y_MIN);
         joystick.getYCalibration().center = eeprom.read16(Eeprom::JOYSTICK_Y_CENTER);
         joystick.getYCalibration().max = eeprom.read16(Eeprom::JOYSTICK_Y_MAX);
-       
-    }
+        }
     else
     {
         Serial.println("ERROR: Joystick NOT initialized");

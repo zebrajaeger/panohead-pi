@@ -13,7 +13,6 @@ public:
 
     void setup(uint8_t ledPin)
     {
-        Serial.println(ledPin);
         ledPin_ = ledPin;
         pinMode(ledPin_, OUTPUT);
     }

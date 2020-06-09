@@ -70,9 +70,9 @@ public:
         Serial.print(expectedCRC.uint32, HEX);
         Serial.print(" ");
         Serial.print(calculatedCRC.uint32, HEX);
-        Serial.println();
-
-        return expectedCRC.uint32 == calculatedCRC.uint32;
+        bool result = expectedCRC.uint32 == calculatedCRC.uint32;
+        Serial.println(result?" ok": "failed");
+        return result;
     }
 
     void writeRange(EepromAdr_t startAdr, EepromAdr_t endAdr, uint8_t value)
