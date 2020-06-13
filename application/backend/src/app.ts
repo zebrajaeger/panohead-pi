@@ -79,9 +79,9 @@ server.register('cameraStartShot', (v) => bridge.cameraStartShot(v.focusMs, v.tr
 setInterval(() => {
     try {
         const status = bridge.readStatus();
+        //console.log(status.actor.x.isMoving)
         svStatus.setValue(status);
         if (jogging.getValueOr(false)) {
-            //console.log('J', svStatus.getValue());
             bridge.stepperWriteVelocity(0, status.joystick.x);
             bridge.stepperWriteVelocity(1, status.joystick.y);
         }

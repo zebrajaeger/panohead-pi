@@ -14,7 +14,7 @@ export class AppComponent {
       // console.log(e);
       if (e instanceof NavigationEnd) {
         console.log('NavigationEnd');
-        let jogging = (e.url === '/picture/fov') || (e.url === '/pano/fov');
+        let jogging = (e.url === '/picture/fov') || (e.url === '/pano/fov') || (e.url === '/tools/jog');
         wsService.jogging.setValue(jogging);
         console.log('SET JOGGING', jogging)
       }

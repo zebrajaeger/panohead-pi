@@ -20,18 +20,22 @@ public:
     typedef struct
     {
         u32_t pos;
-        bool isMoving;
+        u16_t speed;
+        bool isAtTargetPos;
     } Stepper_t;
 
     typedef union {
         struct
         {
             uint8_t atTargetPosition0 : 1;
+            uint8_t isMoving0 : 1;
             uint8_t atTargetPosition1 : 1;
+            uint8_t isMoving1 : 1;
             uint8_t atTargetPosition2 : 1;
+            uint8_t isMoving2 : 1;
         } fields;
         u8_t u8;
-    } IsAtTargetPos_t;
+    } MovementStatus_t;
 
     //------------------------------------------------------------------------------
     StepperDriver() : tmc429_()
@@ -72,11 +76,12 @@ public:
     //------------------------------------------------------------------------------
     {
         status_ = tmc429_.getStatus();
-        steppers_[0].isMoving = !status_.at_target_position_0;
-        steppers_[1].isMoving = !status_.at_target_position_1;
-
+        steppers_[0].isAtTargetPos = status_.at_target_position_0;
         steppers_[0].pos.uint32 = tmc429_.getActualPosition(0);
+        steppers_[0].speed.uint16 = tmc429_.getActualVelocityInHz(0);
+        steppers_[1].isAtTargetPos = status_.at_target_position_1;
         steppers_[1].pos.uint32 = tmc429_.getActualPosition(1);
+        steppers_[1].speed.uint16 = tmc429_.getActualVelocityInHz(1);
 
         // -----
         if (cmd_velocity_axis_0_available)
@@ -171,11 +176,12 @@ public:
         tmc429_.setLimitsInHz(axisIndex.uint8, limit.velocityMinHz, limit.velocityMaxHz, limit.acceleration_max_hz_per_s);
     }
 
+/*
     //------------------------------------------------------------------------------
     bool isMoving(const uint8_t axisIndex) const
     //------------------------------------------------------------------------------
     {
-        return steppers_[axisIndex].isMoving;
+        return steppers_[axisIndex].speed.uint32 != 0;
     }
 
     //------------------------------------------------------------------------------
@@ -183,6 +189,19 @@ public:
     //------------------------------------------------------------------------------
     {
         return steppers_[axisIndex].pos;
+    }
+    //------------------------------------------------------------------------------
+    const u32_t &getSpeed(const uint8_t axisIndex) const
+    //------------------------------------------------------------------------------
+    {
+        return steppers_[axisIndex].speed;
+    }
+*/
+    //------------------------------------------------------------------------------
+    const Stepper_t &getStepper(const uint8_t axisIndex) const
+    //------------------------------------------------------------------------------
+    {
+        return steppers_[axisIndex];
     }
 
     //------------------------------------------------------------------------------
@@ -193,15 +212,18 @@ public:
     }
 
     //------------------------------------------------------------------------------
-    IsAtTargetPos_t getIsAtTargetPos()
+    MovementStatus_t getMovementStatus()
     //------------------------------------------------------------------------------
     {
-        IsAtTargetPos_t res;
+        MovementStatus_t res;
         memset(&res, 0, sizeof res);
 
         res.fields.atTargetPosition0 = status_.at_target_position_0;
+        res.fields.isMoving0 = steppers_[0].speed.uint16 != 0;
         res.fields.atTargetPosition1 = status_.at_target_position_1;
+        res.fields.isMoving1 = steppers_[1].speed.uint16 != 0;
         res.fields.atTargetPosition2 = status_.at_target_position_2;
+        res.fields.isMoving2 = steppers_[2].speed.uint16 != 0;
 
         return res;
     }

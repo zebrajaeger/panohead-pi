@@ -17,9 +17,10 @@ export interface Shot {
 // status
 export interface Axis {
   isAtPosition: boolean;
+  isMoving: boolean;
   position: number;
+  speed: number;
 }
-
 export interface Actor {
   x: Axis;
   y: Axis;

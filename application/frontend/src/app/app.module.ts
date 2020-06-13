@@ -31,6 +31,7 @@ import { PanoFovComponent } from './content/pano/pano-fov/pano-fov.component';
 import { PanoRobotComponent } from './content/pano/pano-robot/pano-robot.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { JoggingComponent } from './content/tools/jogging/jogging.component';
 
 @NgModule({
   declarations: [
@@ -48,7 +49,8 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
     FovComponent,
     CameraComponent,
     PanoFovComponent,
-    PanoRobotComponent
+    PanoRobotComponent,
+    JoggingComponent
   ],
   imports: [
     BrowserModule,

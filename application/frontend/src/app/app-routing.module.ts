@@ -8,6 +8,7 @@ import {FovComponent} from './content/picture/fov/fov.component';
 import {CameraComponent} from './content/tools/camera/camera.component';
 import {PanoFovComponent} from './content/pano/pano-fov/pano-fov.component';
 import {PanoRobotComponent} from './content/pano/pano-robot/pano-robot.component';
+import {JoggingComponent} from './content/tools/jogging/jogging.component';
 
 const routes: Routes = [
   {path: 'picture/fov', component: FovComponent},
@@ -18,6 +19,7 @@ const routes: Routes = [
   {path: 'pano/robot', component: PanoRobotComponent},
   {path: 'tools/joystick', component: JoystickComponent},
   {path: 'tools/camera', component: CameraComponent},
+  {path: 'tools/jog', component: JoggingComponent},
 ];
 
 @NgModule({

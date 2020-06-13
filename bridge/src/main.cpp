@@ -53,12 +53,16 @@ StatisticTimer statisticTimer;
 void requestEvent()
 // -----------------------------------------------------------------------------
 {
-    WireUtils::write24(stepperDriver.getPos(0));            // 3
-    WireUtils::write24(stepperDriver.getPos(1));            // 3
-    WireUtils::write8(stepperDriver.getIsAtTargetPos().u8); // 1
-    WireUtils::write16(joystick.getX().pos);                // 2
-    WireUtils::write16(joystick.getY().pos);                // 2
-    WireUtils::write8(camera.getStatus().u8);               // 1
+    const StepperDriver::Stepper_t &s1 = stepperDriver.getStepper(0);
+    const StepperDriver::Stepper_t &s2 = stepperDriver.getStepper(1);
+    WireUtils::write8(stepperDriver.getMovementStatus().u8); // 1
+    WireUtils::write24(s1.pos);                              // 3
+    WireUtils::write16(s1.speed);                            // 2
+    WireUtils::write24(s2.pos);                              // 3
+    WireUtils::write16(s2.speed);                            // 2
+    WireUtils::write16(joystick.getX().pos);                 // 2
+    WireUtils::write16(joystick.getY().pos);                 // 2
+    WireUtils::write8(camera.getStatus().u8);                // 1
 }
 
 // -----------------------------------------------------------------------------
@@ -238,8 +242,8 @@ void onJoystickSetBacklash()
 void receiveEvent(int howMany)
 // -----------------------------------------------------------------------------
 {
-    Serial.print(F("receiveEvent n:"));
-    Serial.println(howMany);
+    //Serial.print(F("receiveEvent n:"));
+    //Serial.println(howMany);
     /*
     for(uint8_t i=0; i<howMany; ++i){
         Serial.print("  ");
@@ -411,8 +415,8 @@ void loop()
 // -----------------------------------------------------------------------------
 {
     stepperDriver.loop();
-    digitalWrite(LED_MOVE_PIN_1, stepperDriver.isMoving(0));
-    digitalWrite(LED_MOVE_PIN_2, stepperDriver.isMoving(1));
+    digitalWrite(LED_MOVE_PIN_1, stepperDriver.getStepper(0).speed.uint16 != 0);
+    digitalWrite(LED_MOVE_PIN_2, stepperDriver.getStepper(1).speed.uint16 != 0);
 
     joystick.loop();
     digitalWrite(LED_JOYSTICK_PIN, joystick.getIsJogging());

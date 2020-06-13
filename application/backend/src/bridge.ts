@@ -125,29 +125,35 @@ export class Bridge {
     readStatus(): Status {
         let result: Status = {
             actor: {
-                x: {isAtPosition: true, position: 0},
-                y: {isAtPosition: true, position: 0}
+                x: {isAtPosition: true, isMoving: false, position: 0, speed: 0},
+                y: {isAtPosition: true, isMoving: false, position: 0, speed: 0}
             },
             joystick: {x: 0, y: 0},
             camera: {focus: false, trigger: false}
         }
 
-        let buffer = Buffer.alloc(12);
+        let buffer = Buffer.alloc(15);
         this.i2c.i2cReadSync(this.i2cAddress, buffer.length, buffer);
-        //console.log('B', buffer);
-        result.actor.x.position = this.readI24(buffer, 0);
-        result.actor.y.position = this.readI24(buffer, 3);
 
-        let temp = this.readU8(buffer, 6);
+        let temp = this.readU8(buffer, 0);
         result.actor.x.isAtPosition = (temp & 0x01) != 0;
-        result.actor.y.isAtPosition = (temp & 0x02) != 0;
+        result.actor.x.isMoving = (temp & 0x02) != 0;
+        result.actor.y.isAtPosition = (temp & 0x04) != 0;
+        result.actor.y.isMoving = (temp & 0x08) != 0;
 
-        result.joystick.x = this.readI16(buffer, 7);
-        result.joystick.y = this.readI16(buffer, 9);
+        result.actor.x.position = this.readI24(buffer, 1);
+        result.actor.x.speed = this.readI16(buffer, 4);
+        result.actor.y.position = this.readI24(buffer, 6);
+        result.actor.y.speed = this.readI16(buffer, 9);
+
+
+        result.joystick.x = this.readI16(buffer, 11);
+        result.joystick.y = this.readI16(buffer, 13);
 
         temp = this.readU8(buffer, 11);
         result.camera.focus = (temp & 0x01) !== 0;
         result.camera.trigger = (temp & 0x02) !== 0;
+
         return result;
     }
 
