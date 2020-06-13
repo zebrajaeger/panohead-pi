@@ -6,21 +6,6 @@ LOG.level = "debug";
 
 import {I2CBus} from 'i2c-bus';
 
-export interface Axis {
-    isAtPosition: boolean;
-    position: number;
-}
-
-export interface Actor {
-    x: Axis;
-    y: Axis;
-}
-
-export interface Joystick {
-    x: number;
-    y: number;
-}
-
 enum Commands {
     stepperWriteLimit = 0x20,
     stepperWriteVelocity = 0x21,

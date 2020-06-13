@@ -1,6 +1,33 @@
 <mat-card>
-  Pos: X {{status?.actor.x.position}} Y {{status?.actor.y.position}}<br>
-  @Pos: X {{status?.actor.x.isAtPosition}} Y {{status?.actor.y.isAtPosition}}<br>
-  Move: X {{status?.actor.x.isMoving}} Y {{status?.actor.y.isMoving}}<br>
-  Joystick: X {{status?.joystick.x}} Y {{status?.joystick.y}}<br>
+  <table class="table">
+    <thead>
+    <tr>
+      <td></td>
+      <td class="label">x</td>
+      <td class="label">y</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td class="label">Pos</td>
+      <td class="value">{{status?.actor.x.position}}</td>
+      <td class="value">{{status?.actor.y.position}}</td>
+    </tr>
+    <tr>
+      <td class="label">@Pos</td>
+      <td class="value">{{status?.actor.x.isAtPosition}}</td>
+      <td class="value">{{status?.actor.y.isAtPosition}}</td>
+    </tr>
+    <tr>
+      <td class="label">Moving</td>
+      <td class="value">{{status?.actor.x.isMoving}}</td>
+      <td class="value">{{status?.actor.y.isMoving}}</td>
+    </tr>
+    <tr>
+      <td class="label">Joystick</td>
+      <td class="value">{{status?.joystick.x}}</td>
+      <td class="value">{{status?.joystick.y}}</td>
+    </tr>
+    </tbody>
+  </table>
 </mat-card>
