@@ -74,6 +74,11 @@ public:
         return isRunning_;
     }
 
+    bool isOn()
+    {
+        return on_;
+    }
+
     void loop()
     {
         if (isRunning_)

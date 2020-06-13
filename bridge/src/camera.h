@@ -94,8 +94,8 @@ public:
     {
         Status_t result;
         result.u8.uint8 = 0;
-        result.fields.focus = focusTimer_.isRunning();
-        result.fields.trigger = triggerTimer_.isRunning();
+        result.fields.focus = focusTimer_.isOn();
+        result.fields.trigger = triggerTimer_.isOn();
         return result;
     }
 
