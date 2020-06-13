@@ -1289,10 +1289,10 @@
   resolved "https://registry.yarnpkg.com/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"
   integrity sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==
 
-"@zebrajaeger/ws-value@1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@zebrajaeger/ws-value/-/ws-value-1.0.7.tgz#224a7090ddebd192fc72ab54aa2e75a68d9ff1fe"
-  integrity sha512-vj9ScLBmoyUppgZzmkKElZWvNG2amO3Tv+mEWC/GP8w7yTOMi3ps809ZoGFap+J1f9jIf88mf6pTXZAeJxuyHg==
+"@zebrajaeger/ws-value@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@zebrajaeger/ws-value/-/ws-value-1.1.2.tgz#e6c396cf350c121a00cfa53a1e18e2a82927349c"
+  integrity sha512-fJkZHA+SZua5fRPSC56cFR+0DekaUt/L6Pgt2zcIMTDrwRVjiVOAB+G7DngoJhQwSxbjogm7E/cUfHKvu5MwSg==
   dependencies:
     optional-typescript "^1.4.1"
     rpc-websockets "^5.1.1"

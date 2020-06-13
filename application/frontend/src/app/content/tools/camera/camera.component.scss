@@ -1,0 +1,28 @@
+.mat-card {
+  margin: 5px 5px;
+}
+
+.mat-raised-button {
+  margin: 5px;
+}
+
+.shoptwrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.flash {
+  position: relative;
+  top: 8px;
+  transform: rotate(-16deg);
+  color: #00000050;
+
+  &.focus {
+    color: #ffcd00;
+  }
+
+  &.trigger {
+    color: #ff0008;
+  }
+}

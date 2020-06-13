@@ -1,28 +1,74 @@
 <div class="menu">
 
-  <!-- picture -->
-  <button mat-button [matMenuTriggerFor]="picMenu">Picture</button>
+  <mat-icon *ngIf="connected" class="connected">cloud_done</mat-icon>
+  <mat-icon *ngIf="!connected" class="unconnected">cloud_off</mat-icon>
+
+  <!-- Picture -->
+  <button [matMenuTriggerFor]="picMenu"
+    mat-button routerLinkActive="active">
+    Picture
+  </button>
+  <!-- Picture/Overlap -->
   <mat-menu #picMenu="matMenu" yPosition="above">
-    <button mat-menu-item>FOV</button>
+    <button mat-menu-item routerLink="/picture/fov" routerLinkActive="active">FOV</button>
     <button mat-menu-item routerLink="/picture/overlap" routerLinkActive="active">Overlap</button>
   </mat-menu>
 
-  <!-- shots -->
-  <button mat-button routerLink="/shots" routerLinkActive="active">Shots</button>
+  <!-- Shots -->
+  <button routerLink="/shots"
+          mat-button routerLinkActive="active">
+    Shots
+  </button>
 
-  <!-- motion -->
-  <button mat-button routerLink="/motion" routerLinkActive="active">Motion</button>
+  <!-- Motion -->
+  <button routerLink="/motion"
+          mat-button routerLinkActive="active">
+    Motion
+  </button>
 
-  <!-- pano -->
-  <button mat-button [matMenuTriggerFor]="panoMenu">Pano</button>
+  <!-- Pano -->
+  <button  [matMenuTriggerFor]="panoMenu"
+    mat-button routerLinkActive="active">
+    Pano
+  </button>
   <mat-menu #panoMenu="matMenu" yPosition="above">
-    <button mat-menu-item>FOV</button>
+    <!-- pano/fov -->
+    <button routerLink="/pano/fov"
+            mat-menu-item routerLinkActive="active">
+      FOV
+    </button>
+    <!-- pano/robot -->
+    <button routerLink="/pano/robot"
+            mat-menu-item routerLinkActive="active">
+      Robot
+    </button>
+  </mat-menu>
+
+  <!-- Pano/FOV -->
+  <mat-menu #panoMenu="matMenu" yPosition="above">
+    <button routerLink="/pano/fov"
+            mat-menu-item>
+      FOV
+    </button>
     <button mat-menu-item>Take Pano</button>
   </mat-menu>
 
-  <!-- Joystick -->
-  <button mat-button [matMenuTriggerFor]="toolsMenu">Tools</button>
+  <!-- Tools -->
+  <button  [matMenuTriggerFor]="toolsMenu"
+    mat-button routerLinkActive="active">
+    Tools
+  </button>
   <mat-menu #toolsMenu="matMenu" yPosition="above">
-    <button mat-menu-item routerLink="/tools/joystick" routerLinkActive="active">Joystick</button>
+    <!-- Tools/Joystick -->
+    <button routerLink="/tools/joystick"
+            mat-menu-item routerLinkActive="active">
+      Joystick
+    </button>
+    <!-- Tools/Joystick -->
+    <button routerLink="/tools/camera"
+            mat-menu-item routerLinkActive="active">
+      Camera
+    </button>
   </mat-menu>
 </div>
+

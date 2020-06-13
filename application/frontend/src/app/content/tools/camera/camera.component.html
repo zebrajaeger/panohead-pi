@@ -1,0 +1,69 @@
+<mat-card>
+  Focus:  <mat-icon class="flash" [class.focus]="status?.camera?.focus">flash_on</mat-icon>
+  Trigger:  <mat-icon class="flash" [class.trigger]="status?.camera?.trigger">flash_on</mat-icon>
+</mat-card>
+
+<mat-card>
+  <div class="shoptwrapper">
+    <button mat-raised-button color="warn" (click)="focus(500)">
+      Focus 0,5s
+    </button>
+    <button mat-raised-button color="warn" (click)="focus(1000)">
+      Focus 1s
+    </button>
+    <button mat-raised-button color="warn" (click)="focus(2000)">
+      Focus 2s
+    </button>
+  </div>
+</mat-card>
+
+<mat-card>
+  <div class="shoptwrapper">
+    <button mat-raised-button color="warn" (click)="trigger(500)">
+      Trigger 0,5s
+    </button>
+    <button mat-raised-button color="warn" (click)="trigger(1000)">
+      Trigger 1s
+    </button>
+    <button mat-raised-button color="warn" (click)="trigger(2000)">
+      Trigger 2s
+    </button>
+  </div>
+</mat-card>
+
+<mat-card>
+  <div class="shoptwrapper">
+    <button mat-raised-button color="warn" (click)="shot(500,500)">
+      Focus 0,5s, Trigger 0,5s
+    </button>
+    <button mat-raised-button color="warn" (click)="shot(1000,500)">
+      Focus 1s, Trigger 0,5s
+    </button>
+    <button mat-raised-button color="warn" (click)="shot(2000,500)">
+      Focus 2s, Trigger 0,5s
+    </button>
+  </div>
+  <div class="shoptwrapper">
+    <button mat-raised-button color="warn" (click)="shot(500,1000)">
+      Focus 0,5s, Trigger 1s
+    </button>
+    <button mat-raised-button color="warn" (click)="shot(1000,1000)">
+      Focus 1s, Trigger 1s
+    </button>
+    <button mat-raised-button color="warn" (click)="shot(2000,1000)">
+      Focus 2s, Trigger 1s
+    </button>
+  </div>
+  <div class="shoptwrapper">
+    <button mat-raised-button color="warn" (click)="shot(500,2000)">
+      Focus 0,5s, Trigger 2s
+    </button>
+    <button mat-raised-button color="warn" (click)="shot(1000,2000)">
+      Focus 1s, Trigger 2s
+    </button>
+    <button mat-raised-button color="warn" (click)="shot(2000,2000)">
+      Focus 2s, Trigger 2s
+    </button>
+  </div>
+
+</mat-card>

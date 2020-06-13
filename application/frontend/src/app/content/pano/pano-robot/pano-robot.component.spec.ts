@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PictureComponent } from './picture.component';
+import { PanoRobotComponent } from './pano-robot.component';
 
-describe('PictureComponent', () => {
-  let component: PictureComponent;
-  let fixture: ComponentFixture<PictureComponent>;
+describe('PanoRobotComponent', () => {
+  let component: PanoRobotComponent;
+  let fixture: ComponentFixture<PanoRobotComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ PictureComponent ]
+      declarations: [ PanoRobotComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(PictureComponent);
+    fixture = TestBed.createComponent(PanoRobotComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

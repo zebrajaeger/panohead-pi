@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {WsService} from '../sandbox/ws.service';
 
 @Component({
   selector: 'app-menu',
@@ -7,7 +8,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MenuComponent implements OnInit {
 
-  constructor() { }
+  connected: boolean;
+
+  constructor(private wsService: WsService) {
+    wsService.onConnected(connected => this.connected = connected);
+  }
 
   ngOnInit(): void {
   }

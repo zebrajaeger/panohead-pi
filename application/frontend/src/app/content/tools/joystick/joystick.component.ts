@@ -1,5 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {WsService, Status} from '../../../sandbox/ws.service';
+import {WsService} from '../../../sandbox/ws.service';
+import {NavigationEnd, Router} from '@angular/router';
+import {Status} from '../../../sandbox/wsInterface';
 
 @Component({
   selector: 'app-joystick',
@@ -7,11 +9,40 @@ import {WsService, Status} from '../../../sandbox/ws.service';
   styleUrls: ['./joystick.component.scss']
 })
 export class JoystickComponent {
-  private status: Status;
+  public status: Status;
+  public backlashX: number = 2;
+  public backlashY: number = 2;
 
-  constructor(private wsService: WsService) {
-    wsService.onInitialized(()=>{
-      wsService.status.onChange(s => this.status = s);
-    })
+  constructor(public wsService: WsService) {
+    wsService.status.onChange(s => this.status = s);
+  }
+
+  downX() {
+    if(this.backlashX>0){
+      this.backlashX--;
+    }
+  }
+
+  upX() {
+    if(this.backlashX<100){
+      this.backlashX++;
+    }
+  }
+
+  downY() {
+    if(this.backlashY>0){
+      this.backlashY--;
+    }
+
+  }
+
+  upY() {
+    if(this.backlashY<100){
+      this.backlashY++;
+    }
+  }
+
+  save() {
+    this.wsService.joystickSetBacklash(this.backlashX, this.backlashY);
   }
 }

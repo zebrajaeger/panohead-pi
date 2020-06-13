@@ -1,3 +1,9 @@
+import {Status} from './wsInterface';
+
+const log4js = require("log4js");
+const LOG = log4js.getLogger('bridge');
+LOG.level = "debug";
+
 import {I2CBus} from 'i2c-bus';
 
 export interface Axis {
@@ -15,24 +21,20 @@ export interface Joystick {
     y: number;
 }
 
-export interface Camera {
-    isFocussing: boolean;
-    isTriggering: boolean;
-}
-
-export interface Status {
-    actor: Actor;
-    joystick: Joystick;
-    camera: Camera;
-}
-
 enum Commands {
-    writeLimit = 0,
-    writeVelocity = 20,
-    writePos = 21,
+    stepperWriteLimit = 0x20,
+    stepperWriteVelocity = 0x21,
+    stepperWritePos = 0x22,
 
-    triggerCameraFocus = 30,
-    triggerCameraTrigger = 31,
+    cameraStartFocus = 0x30,
+    cameraStartTrigger = 0x31,
+    cameraStartShot = 0x32,
+
+    joystickCalibrateAsTopLeft = 0x40,
+    joystickCalibrateAsCenter = 0x41,
+    joystickCalibrateAsBottomRight = 0x42,
+
+    joystickSetBacklash = 0x50
 }
 
 export class Bridge {
@@ -40,9 +42,9 @@ export class Bridge {
     constructor(private i2c: I2CBus, private i2cAddress: number) {
     }
 
-    writeLimit(axis: number, velocityMinHz: number, velocityMaxHz: number, accelerationMaxHzPerSecond: number): void {
+    stepperWriteLimit(axis: number, velocityMinHz: number, velocityMaxHz: number, accelerationMaxHzPerSecond: number): void {
         let buffer = Buffer.alloc(11);
-        this.write8(buffer, 0, Commands.writeLimit);
+        this.write8(buffer, 0, Commands.stepperWriteLimit);
         this.write8(buffer, 1, axis);
         this.write24(buffer, 2, velocityMinHz);
         this.write24(buffer, 5, velocityMaxHz);
@@ -50,34 +52,73 @@ export class Bridge {
         this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
     }
 
-    writePos(axis: number, pos: number): void {
+    stepperWritePos(axis: number, pos: number): void {
         let buffer = Buffer.alloc(5);
-        this.write8(buffer, 0, Commands.writePos);
+        this.write8(buffer, 0, Commands.stepperWritePos);
         this.write8(buffer, 1, axis);
         this.write24(buffer, 2, pos);
-        console.log(buffer);
         this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
     }
 
-    writeVelocity(axis: number, velocity: number): void {
+    stepperWriteVelocity(axis: number, velocity: number): void {
         let buffer = Buffer.alloc(5);
-        this.write8(buffer, 0, Commands.writeVelocity);
+        this.write8(buffer, 0, Commands.stepperWriteVelocity);
         this.write8(buffer, 1, axis);
         this.write24(buffer, 2, velocity);
         this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
     }
 
-    triggerCameraFocus(durationMs: number) {
+    cameraStartFocus(durationMs: number) {
         let buffer = Buffer.alloc(5);
-        this.write8(buffer, 0, Commands.triggerCameraFocus);
+        this.write8(buffer, 0, Commands.cameraStartFocus);
         this.write32(buffer, 1, durationMs);
         this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
     }
 
-    triggerCameraTrigger(durationMs: number) {
+    cameraStartTrigger(durationMs: number) {
         let buffer = Buffer.alloc(5);
-        this.write8(buffer, 0, Commands.triggerCameraTrigger);
+        this.write8(buffer, 0, Commands.cameraStartTrigger);
         this.write32(buffer, 1, durationMs);
+        this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
+    }
+
+    cameraStartShot(focusMs: number, triggerMs: number) {
+        let buffer = Buffer.alloc(9);
+        this.write8(buffer, 0, Commands.cameraStartShot);
+        this.write32(buffer, 1, focusMs);
+        this.write32(buffer, 5, triggerMs);
+        this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
+    }
+
+    joystickCalibrateAsTopLeft() {
+        LOG.debug('joystickCalibrateAsTopLeft()');
+        let buffer = Buffer.alloc(1);
+        this.write8(buffer, 0, Commands.joystickCalibrateAsTopLeft);
+        this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
+    }
+
+    joystickCalibrateAsCenter() {
+        LOG.debug('joystickCalibrateAsCenter()');
+        let buffer = Buffer.alloc(1);
+        this.write8(buffer, 0, Commands.joystickCalibrateAsCenter);
+        this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
+    }
+
+    joystickCalibrateAsBottomRight() {
+        LOG.debug('joystickCalibrateAsBottomRight()');
+        let buffer = Buffer.alloc(1);
+        this.write8(buffer, 0, Commands.joystickCalibrateAsBottomRight);
+        this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
+    }
+
+    joystickSetBacklash(x1: number, x2: number, y1: number, y2: number) {
+        LOG.debug('joystickSetBacklash()');
+        let buffer = Buffer.alloc(9);
+        this.write8(buffer, 0, Commands.joystickSetBacklash);
+        this.write16(buffer, 1, x1);
+        this.write16(buffer, 3, x2);
+        this.write16(buffer, 5, y1);
+        this.write16(buffer, 7, y2);
         this.i2c.i2cWriteSync(this.i2cAddress, buffer.length, buffer);
     }
 
@@ -88,12 +129,12 @@ export class Bridge {
                 y: {isAtPosition: true, position: 0}
             },
             joystick: {x: 0, y: 0},
-            camera: {isFocussing: false, isTriggering: false}
+            camera: {focus: false, trigger: false}
         }
 
         let buffer = Buffer.alloc(12);
         this.i2c.i2cReadSync(this.i2cAddress, buffer.length, buffer);
-
+        //console.log('B', buffer);
         result.actor.x.position = this.readI24(buffer, 0);
         result.actor.y.position = this.readI24(buffer, 3);
 
@@ -105,9 +146,8 @@ export class Bridge {
         result.joystick.y = this.readI16(buffer, 9);
 
         temp = this.readU8(buffer, 11);
-        result.camera.isFocussing = (temp & 0x01) !== 0;
-        result.camera.isTriggering = (temp & 0x02) !== 0;
-
+        result.camera.focus = (temp & 0x01) !== 0;
+        result.camera.trigger = (temp & 0x02) !== 0;
         return result;
     }
 
@@ -139,6 +179,11 @@ export class Bridge {
         } else {
             return v;
         }
+    }
+
+    private write16(buffer: Buffer, atIndex: number, value: number) {
+        buffer[atIndex] = value & 0xff;
+        buffer[atIndex + 1] = value >> 8 & 0xff;
     }
 
     private readU16(buffer: Buffer, atIndex: number) {

@@ -1,0 +1,31 @@
+.mat-card {
+  margin: 5px 5px;
+}
+
+.updown {
+  padding: 0;
+  min-width: 40px;
+}
+
+.backslash-slider {
+  margin: 0 10px;
+  min-width: 500px;
+}
+
+.save {
+  margin-left: 315px;
+}
+
+.calibration-card {
+ display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.calibrate {
+  margin: 5px;
+}
+
+.rotat180{
+  transform:rotate(180deg);
+}

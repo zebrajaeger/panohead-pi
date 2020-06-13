@@ -1,3 +1,21 @@
 .menu {
   background-color: white;
 }
+
+.mat-button.active {
+  background-color: lightgray;
+}
+
+.mat-icon {
+  position: relative;
+  top: 5px;
+  left: 5px;
+
+  &.connected {
+    color: green;
+  }
+
+  &.unconnected {
+    color: red;
+  }
+}

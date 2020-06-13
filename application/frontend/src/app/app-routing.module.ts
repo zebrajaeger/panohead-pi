@@ -4,12 +4,20 @@ import {ShotsComponent} from './content/shots/shots.component';
 import {MotionComponent} from './content/motion/motion.component';
 import {PictureOverlapComponent} from './content/picture/picture-overlap/picture-overlap.component';
 import {JoystickComponent} from './content/tools/joystick/joystick.component';
+import {FovComponent} from './content/picture/fov/fov.component';
+import {CameraComponent} from './content/tools/camera/camera.component';
+import {PanoFovComponent} from './content/pano/pano-fov/pano-fov.component';
+import {PanoRobotComponent} from './content/pano/pano-robot/pano-robot.component';
 
 const routes: Routes = [
+  {path: 'picture/fov', component: FovComponent},
   {path: 'picture/overlap', component: PictureOverlapComponent},
   {path: 'shots', component: ShotsComponent},
   {path: 'motion', component: MotionComponent},
+  {path: 'pano/fov', component: PanoFovComponent},
+  {path: 'pano/robot', component: PanoRobotComponent},
   {path: 'tools/joystick', component: JoystickComponent},
+  {path: 'tools/camera', component: CameraComponent},
 ];
 
 @NgModule({

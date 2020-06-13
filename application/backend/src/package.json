@@ -6,6 +6,7 @@
   "scripts": {
     "tsc": "tsc",
     "develop": "ts-node-dev --respawn --transpileOnly ./app.ts",
+    "sandbox": "ts-node-dev --respawn --transpileOnly ./panocalc.ts",
     "prod": "tsc && node ./build/app.js",
     "i": "yarn install"
   },
@@ -13,11 +14,14 @@
   "license": "LGPL-3.0-or-later",
   "dependencies": {
     "@types/configstore": "^4.0.0",
-    "@zebrajaeger/ws-value": "1.0.7",
+    "@types/i2c-bus": "5.1.0",
+    "@zebrajaeger/ws-value": "^1.1.0",
     "configstore": "^5.0.1",
+    "deep-equal": "^2.0.3",
     "exit-hook": "latest",
     "i2c-bus": "5.1.0",
-    "@types/i2c-bus": "5.1.0"
+    "log4js": "^6.3.0",
+    "typescript-optional": "^2.0.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.4",

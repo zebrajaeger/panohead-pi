@@ -2,84 +2,93 @@ import {Server} from 'rpc-websockets';
 import {ServerValue} from '@zebrajaeger/ws-value';
 import {openSync} from 'i2c-bus';
 import {Bridge, Status} from './bridge';
+import Configstore from 'configstore';
+import {FOV, Point, Overlap, Pano, PanoFOV, Shot, Timing, wsNames} from './wsInterface';
+import {PanoCalc} from './panocalc';
+import {PersistentValue} from './persistentvalue';
+import {Robot, State} from './robot';
 
-const server = new Server({port: 8081, host: '0.0.0.0'});
-const STATUS = 'status';
-let svStatus = new ServerValue<Status>(server, STATUS);
-
-let i2c = openSync(1);
-
-let bridge = new Bridge(i2c, 0x45);
-setInterval(() => {
-    let status = bridge.readStatus();
-    svStatus.setValue(status);
-    //console.log('status', status);
-}, 20);
-
-
-//bridge.writePos(0, -2000);
-bridge.writeVelocity(0, 100);
-
-// import {Server} from 'rpc-websockets';
-// import {ServerValue} from '@zebrajaeger/ws-value';
-// import Configstore from 'configstore';
-
-
-/*
-enum Commands {
-    writeLimit = 0,
-
-    writeVelocity = 20,
-    writePos = 21,
-
-    readPos = 50,
-    readIsMoving = 51,
-
-    unknown = 127
-}
-
-function i2cSend(a: number[]): number {
-    const buffer = Buffer.from(a);
-    return i2c.i2cWriteSync(0x45, buffer.length, buffer);
-}
+const log4js = require("log4js");
+const LOG = log4js.getLogger('server');
+LOG.level = "debug";
+const config = new Configstore('test');
 
 const i2c = openSync(1);
-i2cSend([Commands.writePos, 123]);
+const bridge = new Bridge(i2c, 0x45);
 
-i2c.closeSync();
-*/
+// values
+const server = new Server({port: 8081, host: '0.0.0.0'});
+const svStatus = new ServerValue<Status>(server, wsNames.STATUS);
+const jogging = new ServerValue<boolean>(server, wsNames.JOGGING);
+const pano = new PersistentValue<Pano>(server, config, wsNames.PANO, {x: [], y: []});
 
-// const config = new Configstore('test');
-// console.log(config.get('foo'));
-// config.get('timing')
+const robot = new Robot();
+server.event('robot.state');
+server.event('robot.action');
+robot.onStateChanged((newState: State, oldState: State) => {
+    server.emit('robot.state', {newState, oldState})
+})
+robot.onShot((focusMs: number, triggerMs: number) => {
+    server.emit('robot.action', {type: 'shot', focusMs, triggerMs})
+    bridge.cameraStartShot(focusMs, triggerMs);
+})
+robot.onMoveTo((x: number, y: number) => {
+    server.emit('robot.action', {type: 'move', x, y})
+    bridge.stepperWritePos(0, x);
+    bridge.stepperWritePos(1, y);
+})
+robot.onStop(() => {
+    server.emit('robot.action', {type: 'stop'})
+    bridge.stepperWriteVelocity(0, 0);
+    bridge.stepperWriteVelocity(0, 1);
+})
 
-// interface Timing {
-//     delayAfterMove: number;
-//     delayBetweenShots: number;
-//     delayAfterLastShot: number;
-// }
-//
-// interface Shot {
-//     focusTime: number;
-//     triggerTime: number;
-// }
-//
-// class PersistentValue<T> extends ServerValue<T> {
-//     constructor(server: Server, private configStore: Configstore, name: string, initialValue: T) {
-//         super(server, name);
-//         this.setValue(configStore.get(name) || initialValue);
-//         this.onChange(v => configStore.set(name, v));
-//     }
-// }
-//
-// const server = new Server({port: 8081, host: '0.0.0.0'});
-// const TIMING = 'timing';
-// const SHOTS = 'shots';
-// const values = {
-//     TIMING: new PersistentValue<Timing>(server, config, TIMING, {
-//         delayAfterMove: 0.0,
-//         delayBetweenShots: 0.0,
-//         delayAfterLastShot: 0.0
-//     }),
-//     SHOTS: new PersistentValue<Shot[]>(server, config, SHOTS, [{focusTime: 0.0, triggerTime: 1.0}])
-// };
+const panoCalc = new PanoCalc();
+panoCalc.onPano(p => pano.setValue(p));
+
+const timing = new PersistentValue<Timing>(server, config, wsNames.TIMING, {
+    delayAfterMove: 0.0,
+    delayBetweenShots: 0.0,
+    delayAfterLastShot: 0.0
+})
+const shots = new PersistentValue<Shot[]>(server, config, wsNames.SHOTS, [{focusTime: 0.0, triggerTime: 1.0}]);
+const imageFov = new PersistentValue<FOV>(server, config, wsNames.IMAGE_FOV, {a: {x: 0, y: 0}, b: {x: 0, y: 0}});
+imageFov.onChange(v => panoCalc.imageFov = v)
+const overlap = new PersistentValue<Overlap>(server, config, wsNames.OVERLAP, {x: 30, y: 30});
+overlap.onChange(v => panoCalc.overlap = v)
+const panoFov = new PersistentValue<PanoFOV>(server, config, wsNames.PANO_FOV, {
+    a: {x: 0, y: 0},
+    b: {x: 0, y: 0},
+    partial: true
+});
+panoFov.onChange(v => panoCalc.panoFov = v)
+
+// callbacks
+server.register('joystickCalibrateAsTopLeft', () => bridge.joystickCalibrateAsTopLeft());
+server.register('joystickCalibrateAsCenter', () => bridge.joystickCalibrateAsCenter());
+server.register('joystickCalibrateAsBottomRight', () => bridge.joystickCalibrateAsBottomRight());
+server.register('joystickSetBacklash', v => bridge.joystickSetBacklash(v.x1, v.x2, v.y1, v.y2));
+server.register('panoStart', () => robot.start(pano.getValue(), timing.getValue(), shots.getValue()));
+server.register('panoStop', () => robot.stop());
+server.register('panoPauseResume', () => robot.pauseResume());
+server.register('cameraStartFocus', (v) => bridge.cameraStartFocus(v.durationMs));
+server.register('cameraStartTrigger', (v) => bridge.cameraStartTrigger(v.durationMs));
+server.register('cameraStartShot', (v) => bridge.cameraStartShot(v.focusMs, v.triggerMs));
+
+// bridge
+setInterval(() => {
+    try {
+        const status = bridge.readStatus();
+        svStatus.setValue(status);
+        if (jogging.getValueOr(false)) {
+            //console.log('J', svStatus.getValue());
+            bridge.stepperWriteVelocity(0, status.joystick.x);
+            bridge.stepperWriteVelocity(1, status.joystick.y);
+        }
+
+    } catch (err) {
+        console.error(err);
+    }
+}, 20);
+
+LOG.info('Server started');

@@ -1,4 +1,63 @@
+<mat-card>
+  <div>Joystick Position: {{status?.joystick?.x}},{{status?.joystick?.y}}</div>
+</mat-card>
+
+<mat-card class="calibration-card">
+  <button class="calibrate" mat-raised-button color="warn" (click)="this.wsService.joystickCalibrateAsTopLeft()">
+    <mat-icon>border_style</mat-icon>
+    Calibrate Upper-Left corner
+  </button>
+  <button class="calibrate" mat-raised-button color="warn" (click)="this.wsService.joystickCalibrateAsCenter()">
+    <mat-icon>border_inner</mat-icon>
+    Calibrate Center corner
+  </button>
+  <button class="calibrate" mat-raised-button color="warn" (click)="this.wsService.joystickCalibrateAsBottomRight()">
+    <mat-icon class="rotat180">border_style</mat-icon>
+    Calibrate Bottom-Right corner
+  </button>
+</mat-card>
 
 <mat-card>
-  {{status?.joystick.x}},{{status?.joystick.y}}
+  <div>
+
+    X:
+    <button class="updown" (click)="downX()" mat-raised-button>
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <mat-slider
+      class="backslash-slider"
+      max="100"
+      min="0"
+      thumbLabel="true"
+      tickInterval="auto"
+      [(value)]="backlashX">
+    </mat-slider>
+    <button class="updown" (click)="upX()" mat-raised-button>
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    : {{backlashX}}
+  </div>
+  <div>
+    Y:
+    <button class="updown" (click)="downY()" mat-raised-button>
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <mat-slider
+      class="backslash-slider"
+      max="100"
+      min="0"
+      thumbLabel="true"
+      tickInterval="auto"
+      [(value)]="backlashY">
+    </mat-slider>
+    <button class="updown" (click)="upY()" mat-raised-button>
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    : {{backlashY}}
+  </div>
+  <div>
+    <button class="save" (click)="save()" mat-raised-button color="warn">
+      Set
+    </button>
+  </div>
 </mat-card>

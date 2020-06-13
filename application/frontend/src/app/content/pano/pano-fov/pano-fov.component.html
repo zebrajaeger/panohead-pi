@@ -1,0 +1,40 @@
+<mat-card>
+  x: {{wsService.status?.getValue()?.actor.x.position}},
+  y: {{wsService.status?.getValue()?.actor.y.position}}
+</mat-card>
+
+<mat-card>
+  <label for="partial-slider-input">
+    Partial:&nbsp;
+    <mat-slide-toggle id="partial-slider" [checked]="fov.partial" (change)="updatePartial($event)"></mat-slide-toggle>
+  </label>
+</mat-card>
+
+<mat-card>
+  <table class="pano-table">
+    <tr>
+      <td class="cell x1 y0">&nbsp;</td>
+      <td class="cell visible top x2 y0" (click)="onTopClick()">{{fov.a.y}}</td>
+      <td class="cell x3 y0">&nbsp;</td>
+    </tr>
+    <tr>
+      <td [class.disabled]="!fov.partial" class="cell visible left  x1 y1" (click)="onLeftClick()">{{fov.a.x}}</td>
+      <td class="cell x2 y1 center">&nbsp;</td>
+      <td [class.disabled]="!fov.partial" class="cell visible right x3 y1" (click)="onRightClick()">{{fov.b.x}}</td>
+    </tr>
+    <tr>
+      <td class="cell x1 y2">&nbsp;</td>
+      <td class="cell visible bottom x2 y2" (click)="onBottomClick()">{{fov.b.y}}</td>
+      <td class="cell x3 y2">&nbsp;</td>
+    </tr>
+  </table>
+</mat-card>
+
+<mat-card class="buttons">
+  <button class="calibrate" mat-raised-button color="primary" (click)="clear()">
+    Clear
+  </button>
+  <button class="calibrate" mat-raised-button color="warn" (click)="save()">
+    Save
+  </button>
+</mat-card>

@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {UiService} from '../../ui/ui.service';
-import {Shot, WsService} from '../../sandbox/ws.service';
+import { WsService} from '../../sandbox/ws.service';
+import {Shot} from '../../sandbox/wsInterface';
 
 @Component({
   selector: 'app-shots',
@@ -13,11 +14,11 @@ export class ShotsComponent {
   shots: Shot[];
 
   constructor(private uiService: UiService, public wsService: WsService) {
-    wsService.onInitialized(() => {
+    // wsService.onInitialized(() => {
       wsService.shots.onChange(() => {
         this.shots = wsService.shots.getValue();
       });
-    });
+    // });
   }
 
   editCell(shot: Shot, column: string) {
