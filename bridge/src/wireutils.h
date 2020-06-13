@@ -26,7 +26,7 @@ public:
         if (Wire.available() >= 2)
         {
             uint8_t res = Wire.readBytes(&value.bytes[0], 2);
-            return res == 1;
+            return res == 2;
         }
         return false;
     }

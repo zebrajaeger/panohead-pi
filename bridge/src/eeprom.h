@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <EEPROM.h>
+#include <avr/pgmspace.h>
 
 #include "types.h"
 
@@ -12,12 +13,18 @@ public:
     {
         CRC = (uint16_t)0,
         FIRST_VALUE = (uint16_t)4,
+
         JOYSTICK_X_MIN = (uint16_t)4,
         JOYSTICK_X_CENTER = (uint16_t)8,
         JOYSTICK_X_MAX = (uint16_t)12,
         JOYSTICK_Y_MIN = (uint16_t)16,
         JOYSTICK_Y_CENTER = (uint16_t)20,
-        JOYSTICK_Y_MAX = (uint16_t)24
+        JOYSTICK_Y_MAX = (uint16_t)24,
+
+        JOYSTICK_X_BACKLASH1 = (uint16_t)28,
+        JOYSTICK_X_BACKLASH2 = (uint16_t)32,
+        JOYSTICK_Y_BACKLASH1 = (uint16_t)36,
+        JOYSTICK_Y_BACKLASH2 = (uint16_t)40
     } EepromAdr_t;
 
     Eeprom()
@@ -31,16 +38,16 @@ public:
         {
             uint8_t x = EEPROM[i];
             if (x < 0x10)
-                Serial.print("0");
+                Serial.print(F("0"));
             Serial.print(x, HEX);
-            if ((i+1) % 16 == 0)
+            if ((i + 1) % 16 == 0)
                 Serial.println();
             else
             {
-                if ((i+1) % 4 == 0)
-                    Serial.print("  ");
+                if ((i + 1) % 4 == 0)
+                    Serial.print(F("  "));
                 else
-                    Serial.print(" ");
+                    Serial.print(F(" "));
             }
             ++i;
         }
@@ -50,7 +57,7 @@ public:
     {
         if (!isCRCOk())
         {
-            Serial.println("recreate CRC");
+            Serial.println(F("recreate CRC"));
             writeRange(FIRST_VALUE, (EepromAdr_t)EEPROM.length(), 0);
             recalculateAndWriteCRC();
         }
@@ -66,12 +73,12 @@ public:
     {
         u32_t expectedCRC = read32(CRC);
         u32_t calculatedCRC = crc(FIRST_VALUE, (EepromAdr_t)EEPROM.length());
-        Serial.print("CRC ");
+        Serial.print(F("CRC "));
         Serial.print(expectedCRC.uint32, HEX);
-        Serial.print(" ");
+        Serial.print(F(" "));
         Serial.print(calculatedCRC.uint32, HEX);
         bool result = expectedCRC.uint32 == calculatedCRC.uint32;
-        Serial.println(result?" ok": "failed");
+        Serial.println(result ? F(" ok") : F(" failed"));
         return result;
     }
 

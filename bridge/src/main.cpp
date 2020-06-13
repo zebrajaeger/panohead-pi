@@ -2,6 +2,7 @@
 #include "default_config.h"
 #include <Arduino.h>
 #include <avr/boot.h>
+#include <avr/pgmspace.h>
 
 #include <Wire.h>
 
@@ -9,6 +10,7 @@
 #include "wireutils.h"
 #include "stepperdriver.h"
 
+#include "timer.h"
 #include "joystick.h"
 #include "camera.h"
 #include "eeprom.h"
@@ -21,10 +23,12 @@ enum command_t
 
     cameraStartFocus = 0x30,
     cameraStartTrigger = 0x31,
+    cameraStartShot = 0x32,
 
     joystickCalibrateAsTopLeft = 0x40,
     joystickCalibrateAsCenter = 0x41,
     joystickCalibrateAsBottomRight = 0x42,
+    joystickSetBacklash = 0x50,
 
     unknown = 127
 };
@@ -35,6 +39,15 @@ command_t command_ = unknown;
 Joystick joystick;
 Camera camera;
 Eeprom eeprom;
+
+class StatisticTimer : public IntervalTimer
+{
+    virtual void onTimer()
+    {
+        joystick.dumpValue();
+    }
+};
+StatisticTimer statisticTimer;
 
 // -----------------------------------------------------------------------------
 void requestEvent()
@@ -60,7 +73,7 @@ void onWritePos()
     }
     else
     {
-        Serial.println("; NOT ENOUGH DATA");
+        Serial.println(F("; NOT ENOUGH DATA"));
     }
 }
 // -----------------------------------------------------------------------------
@@ -75,7 +88,7 @@ void onWriteVelocity()
     }
     else
     {
-        Serial.println("; NOT ENOUGH DATA");
+        Serial.println(F("; NOT ENOUGH DATA"));
     }
 }
 // -----------------------------------------------------------------------------
@@ -97,7 +110,7 @@ void onWriteLimit()
     }
     else
     {
-        Serial.println("; NOT ENOUGH DATA");
+        Serial.println(F("; NOT ENOUGH DATA"));
     }
 }
 // -----------------------------------------------------------------------------
@@ -105,7 +118,7 @@ void onTriggerCameraFocus()
 // -----------------------------------------------------------------------------
 {
     u32_t ms;
-    if (WireUtils::read24(ms))
+    if (WireUtils::read32(ms))
     {
         camera.startFocus(ms);
     }
@@ -115,9 +128,21 @@ void onTriggerCameraTrigger()
 // -----------------------------------------------------------------------------
 {
     u32_t ms;
-    if (WireUtils::read24(ms))
+    if (WireUtils::read32(ms))
     {
         camera.startTrigger(ms);
+    }
+}
+
+// -----------------------------------------------------------------------------
+void onTriggerCameraShot()
+// -----------------------------------------------------------------------------
+{
+    u32_t focusMs;
+    u32_t triggerMs;
+    if (WireUtils::read32(focusMs) && WireUtils::read32(triggerMs))
+    {
+        camera.startShot(focusMs, triggerMs);
     }
 }
 
@@ -125,13 +150,13 @@ void onTriggerCameraTrigger()
 void onJoystickCalibrateAsTopLeft()
 // -----------------------------------------------------------------------------
 {
-    Serial.print("onJoystickCalibrateAsTopLeft()");
+    Serial.print(F("onJoystickCalibrateAsTopLeft()"));
 
     u16_t x = joystick.getX().raw;
     joystick.getXCalibration().min = x;
     eeprom.write16(Eeprom::JOYSTICK_X_MIN, x);
     Serial.print(x.uint16);
-    Serial.print(" ");
+    Serial.print(F(" "));
 
     u16_t y = joystick.getY().raw;
     joystick.getYCalibration().min = y;
@@ -146,7 +171,7 @@ void onJoystickCalibrateAsTopLeft()
 void onJoystickCalibrateAsCenter()
 // -----------------------------------------------------------------------------
 {
-    Serial.print("onJoystickCalibrateAsCenter()");
+    Serial.print(F("onJoystickCalibrateAsCenter()"));
 
     u16_t x = joystick.getX().raw;
     joystick.getXCalibration().center = x;
@@ -167,7 +192,7 @@ void onJoystickCalibrateAsCenter()
 void onJoystickCalibrateAsBottomRight()
 // -----------------------------------------------------------------------------
 {
-    Serial.print("onJoystickCalibrateAsBottomRight()");
+    Serial.print(F("onJoystickCalibrateAsBottomRight()"));
 
     u16_t x = joystick.getX().raw;
     joystick.getXCalibration().max = x;
@@ -185,10 +210,35 @@ void onJoystickCalibrateAsBottomRight()
 }
 
 // -----------------------------------------------------------------------------
+void onJoystickSetBacklash()
+// -----------------------------------------------------------------------------
+{
+    Serial.print(F("onJoystickSetBacklash()"));
+
+    u16_t backlashX1;
+    u16_t backlashX2;
+    u16_t backlashY1;
+    u16_t backlashY2;
+    if (WireUtils::read16(backlashX1) && WireUtils::read16(backlashX2) && WireUtils::read16(backlashY1) && WireUtils::read16(backlashY2))
+    {
+        joystick.getXCalibration().backlash1 = backlashX1;
+        joystick.getXCalibration().backlash2 = backlashX2;
+        joystick.getYCalibration().backlash1 = backlashY1;
+        joystick.getYCalibration().backlash2 = backlashY2;
+
+        eeprom.write16(Eeprom::JOYSTICK_X_BACKLASH1, backlashX1);
+        eeprom.write16(Eeprom::JOYSTICK_X_BACKLASH2, backlashX2);
+        eeprom.write16(Eeprom::JOYSTICK_Y_BACKLASH1, backlashY1);
+        eeprom.write16(Eeprom::JOYSTICK_Y_BACKLASH2, backlashY2);
+        eeprom.recalculateAndWriteCRC();
+    }
+}
+
+// -----------------------------------------------------------------------------
 void receiveEvent(int howMany)
 // -----------------------------------------------------------------------------
 {
-    Serial.print("receiveEvent n:");
+    Serial.print(F("receiveEvent n:"));
     Serial.println(howMany);
     /*
     for(uint8_t i=0; i<howMany; ++i){
@@ -218,6 +268,9 @@ void receiveEvent(int howMany)
         case cameraStartTrigger:
             onTriggerCameraTrigger();
             break;
+        case cameraStartShot:
+            onTriggerCameraShot();
+            break;
         case joystickCalibrateAsTopLeft:
             onJoystickCalibrateAsTopLeft();
             break;
@@ -227,9 +280,12 @@ void receiveEvent(int howMany)
         case joystickCalibrateAsBottomRight:
             onJoystickCalibrateAsBottomRight();
             break;
+        case joystickSetBacklash:
+            onJoystickSetBacklash();
+            break;
         default:
         {
-            Serial.print("receiveEvent: UNKOWN COMMAND: ");
+            Serial.print(F("receiveEvent: UNKOWN COMMAND: "));
             Serial.println(command_);
         }
         }
@@ -253,19 +309,19 @@ void setup()
     uint8_t highBits = boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS);
     uint8_t extendedBits = boot_lock_fuse_bits_get(GET_EXTENDED_FUSE_BITS);
     uint8_t lockBits = boot_lock_fuse_bits_get(GET_LOCK_BITS);
-    Serial.print("Low:  0x");
+    Serial.print(F("Low:  0x"));
     Serial.println(lowBits, HEX);
-    Serial.print("High: 0x");
+    Serial.print(F("High: 0x"));
     Serial.println(highBits, HEX);
-    Serial.print("Ext:  0x");
+    Serial.print(F("Ext:  0x"));
     Serial.println(extendedBits, HEX);
-    Serial.print("Lock: 0x");
+    Serial.print(F("Lock: 0x"));
     Serial.println(lockBits, HEX);
 
     // check that clockout is set
     if ((lowBits & 0x40) != 0)
     {
-        Serial.println("ERROR: CKOUT-bit on low-efuse is set. That mean the TMC429 has no 16MHz clock and cannot work.");
+        Serial.println(F("ERROR: CKOUT-bit on low-efuse is set. That mean the TMC429 has no 16MHz clock and cannot work."));
         pinMode(LED_BUILTIN, OUTPUT);
         for (;;)
         {
@@ -279,12 +335,12 @@ void setup()
     // EEPROM
     if (eeprom.setup())
     {
-        Serial.println("EEPROM initialized");
-        //eeprom.dump();
+        Serial.println(F("EEPROM initialized"));
+        eeprom.dump();
     }
     else
     {
-        Serial.println("ERROR: EEPROM NOT initialized");
+        Serial.println(F("ERROR: EEPROM NOT initialized"));
     }
 
     // LEDs
@@ -305,39 +361,49 @@ void setup()
     StepperDriver::Limit_t limits[3] = {limit, limit, limit};
     if (stepperDriver.setup(CS_PIN, TMC_CLOCK_MHZ, limits))
     {
-        Serial.println("StepperDriver initialized");
+        Serial.println(F("StepperDriver initialized"));
     }
     else
     {
-        Serial.println("ERROR: StepperDriver NOT initialized");
+        Serial.println(F("ERROR: StepperDriver NOT initialized"));
     }
 
     // Joystick
     if (joystick.setup(JOYSTICK_X_PIN, JOYSTICK_Y_PIN))
     {
-        Serial.println("Joystick initialized");
+        Serial.println(F("Joystick initialized"));
         joystick.getXCalibration().min = eeprom.read16(Eeprom::JOYSTICK_X_MIN);
         joystick.getXCalibration().center = eeprom.read16(Eeprom::JOYSTICK_X_CENTER);
-        joystick.getXCalibration().max = eeprom.read16(Eeprom::JOYSTICK_X_MAX);
+        joystick.getXCalibration().backlash1 = eeprom.read16(Eeprom::JOYSTICK_X_BACKLASH1);
+        joystick.getXCalibration().backlash2 = eeprom.read16(Eeprom::JOYSTICK_X_BACKLASH2);
 
         joystick.getYCalibration().min = eeprom.read16(Eeprom::JOYSTICK_Y_MIN);
         joystick.getYCalibration().center = eeprom.read16(Eeprom::JOYSTICK_Y_CENTER);
         joystick.getYCalibration().max = eeprom.read16(Eeprom::JOYSTICK_Y_MAX);
-        }
+        joystick.getYCalibration().backlash1 = eeprom.read16(Eeprom::JOYSTICK_Y_BACKLASH1);
+        joystick.getYCalibration().backlash2 = eeprom.read16(Eeprom::JOYSTICK_Y_BACKLASH2);
+
+        joystick.dumpCalibration();
+    }
     else
     {
-        Serial.println("ERROR: Joystick NOT initialized");
+        Serial.println(F("ERROR: Joystick NOT initialized"));
     }
 
     //Camera
     if (camera.setup(CAMERA_FOCUS_PIN, CAMERA_TRIGGER_PIN))
     {
-        Serial.println("Camera initialized");
+        Serial.println(F("Camera initialized"));
     }
     else
     {
-        Serial.println("ERROR: Camera NOT initialized");
+        Serial.println(F("ERROR: Camera NOT initialized"));
     }
+
+    // statistic
+    statisticTimer.start(5000, false);
+
+    Serial.println(F("################### START ###################"));
 }
 
 // -----------------------------------------------------------------------------
@@ -352,4 +418,5 @@ void loop()
     digitalWrite(LED_JOYSTICK_PIN, joystick.getIsJogging());
 
     camera.loop();
+    statisticTimer.loop();
 }

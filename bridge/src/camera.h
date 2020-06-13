@@ -17,17 +17,21 @@ public:
         pinMode(ledPin_, OUTPUT);
     }
 
-    virtual void trigger(uint32_t durationMs)
+    virtual void triggerFor(uint32_t durationMs)
     {
-        Serial.println(durationMs);
-
-        Timer::trigger(durationMs);
+        Timer::triggerFor(durationMs);
         digitalWrite(ledPin_, 1);
     }
 
-    virtual void onTimer()
+    virtual void triggerAfterDelay(uint32_t delayMs, uint32_t durationMs)
     {
+        Timer::triggerAfterDelay(delayMs, durationMs);
         digitalWrite(ledPin_, 0);
+    }
+
+    virtual void onTimer(bool isOn)
+    {
+        digitalWrite(ledPin_, isOn);
     }
 
 private:
@@ -62,7 +66,7 @@ public:
 
     void startFocus(u32_t ms)
     {
-        focusTimer_.trigger(ms.uint32);
+        focusTimer_.triggerFor(ms.uint32);
     }
 
     bool isFocusing()
@@ -72,7 +76,13 @@ public:
 
     void startTrigger(u32_t ms)
     {
-        triggerTimer_.trigger(ms.uint32);
+        triggerTimer_.triggerFor(ms.uint32);
+    }
+
+    void startShot(u32_t focusMs, u32_t triggerMs)
+    {
+        focusTimer_.triggerFor(focusMs.uint32 + triggerMs.uint32);
+        triggerTimer_.triggerAfterDelay(focusMs.uint32, triggerMs.uint32);
     }
 
     bool isTriggering()
