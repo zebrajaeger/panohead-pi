@@ -63,6 +63,8 @@ void requestEvent()
     WireUtils::write16(joystick.getX().pos);                 // 2
     WireUtils::write16(joystick.getY().pos);                 // 2
     WireUtils::write8(camera.getStatus().u8);                // 1
+    //                                                      -------
+    //                                                         16
 }
 
 // -----------------------------------------------------------------------------

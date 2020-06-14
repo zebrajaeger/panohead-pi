@@ -117,7 +117,7 @@ export class Bridge {
             camera: {focus: false, trigger: false}
         }
 
-        let buffer = Buffer.alloc(15);
+        let buffer = Buffer.alloc(16);
         this.i2c.i2cReadSync(this.i2cAddress, buffer.length, buffer);
 
         let temp = this.readU8(buffer, 0);
@@ -135,7 +135,7 @@ export class Bridge {
         result.joystick.x = this.readI16(buffer, 11);
         result.joystick.y = this.readI16(buffer, 13);
 
-        temp = this.readU8(buffer, 11);
+        temp = this.readU8(buffer, 15);
         result.camera.focus = (temp & 0x01) !== 0;
         result.camera.trigger = (temp & 0x02) !== 0;
 

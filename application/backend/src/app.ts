@@ -1,9 +1,9 @@
 import {Server} from 'rpc-websockets';
 import {ServerValue} from '@zebrajaeger/ws-value';
 import {openSync} from 'i2c-bus';
-import {Bridge, Status} from './bridge';
+import {Bridge} from './bridge';
 import Configstore from 'configstore';
-import {FOV, Point, Overlap, Pano, PanoFOV, Shot, Timing, wsNames} from './wsInterface';
+import {FOV, Overlap, Pano, PanoFOV, Shot, Timing, wsNames, Status} from './wsInterface';
 import {PanoCalc} from './panocalc';
 import {PersistentValue} from './persistentvalue';
 import {Robot, State} from './robot';
@@ -85,7 +85,6 @@ setInterval(() => {
             bridge.stepperWriteVelocity(0, status.joystick.x);
             bridge.stepperWriteVelocity(1, status.joystick.y);
         }
-
     } catch (err) {
         console.error(err);
     }
