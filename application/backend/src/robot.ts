@@ -1,4 +1,4 @@
-import {Pano, Shot, Timing} from './wsInterface';
+import {Pano, Shot, Shots, Timing} from './wsInterface';
 import {Optional} from 'typescript-optional';
 
 export enum State {
@@ -58,7 +58,7 @@ export class Robot {
     private pano: Optional<Pano> = Optional.empty();
     private position: Optional<Position> = Optional.empty();
     private timing: Optional<Timing> = Optional.empty();
-    private shots: Optional<Shot[]> = Optional.empty();
+    private shots: Optional<Shots> = Optional.empty();
     private shotIndex: number = 0;
     private stateListeners: ((newState: State, oldState: State) => void)[] = [];
     private moveToListeners: ((x: number, y: number) => void)[] = [];
@@ -81,7 +81,7 @@ export class Robot {
         this.stateListeners.push(cb);
     }
 
-    start(pano: Pano, timing: Timing, shots: Shot[]) {
+    start(pano: Pano, timing: Timing, shots: Shots) {
         if (this.state === State.INITIALIZED || this.state === State.FINISHED) {
             this.pano = Optional.of(pano);
             this.timing = Optional.of(timing);
@@ -157,12 +157,12 @@ export class Robot {
     }
 
     private hasNextShot(): boolean {
-        return this.shotIndex < this.shots.get().length;
+        return this.shotIndex < this.shots.get().shots.length;
     }
 
     private nextShot(): Optional<Shot> {
         if (this.hasNextShot()) {
-            return Optional.of(this.shots.get()[this.shotIndex++]);
+            return Optional.of(this.shots.get().shots[this.shotIndex++]);
         } else {
             return Optional.empty();
         }

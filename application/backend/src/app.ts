@@ -3,7 +3,7 @@ import {ServerValue} from '@zebrajaeger/ws-value';
 import {openSync} from 'i2c-bus';
 import {Bridge} from './bridge';
 import Configstore from 'configstore';
-import {FOV, Overlap, Pano, PanoFOV, Shot, Timing, wsNames, Status} from './wsInterface';
+import {FOV, Overlap, Pano, PanoFOV, Shots, Timing, wsNames, Status} from './wsInterface';
 import {PanoCalc} from './panocalc';
 import {PersistentValue} from './persistentvalue';
 import {Robot, State} from './robot';
@@ -51,7 +51,10 @@ const timing = new PersistentValue<Timing>(server, config, wsNames.TIMING, {
     delayBetweenShots: 0.0,
     delayAfterLastShot: 0.0
 })
-const shots = new PersistentValue<Shot[]>(server, config, wsNames.SHOTS, [{focusTime: 0.0, triggerTime: 1.0}]);
+const shots = new PersistentValue<Shots>(server, config, wsNames.SHOTS, {shots:[{focusTime: 0.0, triggerTime: 1.0}]});
+shots.onChange(s => {
+    console.log('shots', s);
+})
 const imageFov = new PersistentValue<FOV>(server, config, wsNames.IMAGE_FOV, {a: {x: 0, y: 0}, b: {x: 0, y: 0}});
 imageFov.onChange(v => panoCalc.imageFov = v)
 const overlap = new PersistentValue<Overlap>(server, config, wsNames.OVERLAP, {x: 30, y: 30});

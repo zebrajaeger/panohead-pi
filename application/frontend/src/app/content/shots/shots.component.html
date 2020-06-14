@@ -1,18 +1,18 @@
 <mat-card>
   <button mat-button (click)="add()"><mat-icon>add</mat-icon></button>
-  <table mat-table [dataSource]="shots" class="mat-elevation-z8 shots">
+  <table mat-table [dataSource]="shots?.shots" class="mat-elevation-z8 shots">
 
-    <ng-container matColumnDef="focusTimeS">
+    <ng-container matColumnDef="focusTime">
       <th mat-header-cell *matHeaderCellDef> focusTime</th>
       <td mat-cell *matCellDef="let shot; let i = index">
-        <button mat-button (click)="editCell(shot,'focusTimeS')">{{shot?.focusTime.toFixed(1)}} s</button>
+        <button mat-button (click)="editCell(shot,'focusTime')">{{shot?.focusTime.toFixed(1)}} s</button>
       </td>
     </ng-container>
 
-    <ng-container matColumnDef="triggerTimeS">
+    <ng-container matColumnDef="triggerTime">
       <th mat-header-cell *matHeaderCellDef> TriggerTime</th>
       <td mat-cell *matCellDef="let shot">
-        <button mat-button (click)="editCell(shot,'triggerTimeS')">{{shot?.triggerTime.toFixed(1)}} s</button>
+        <button mat-button (click)="editCell(shot,'triggerTime')">{{shot?.triggerTime.toFixed(1)}} s</button>
       </td>
     </ng-container>
 

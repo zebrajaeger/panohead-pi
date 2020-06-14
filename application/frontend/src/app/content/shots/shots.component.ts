@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {UiService} from '../../ui/ui.service';
-import { WsService} from '../../sandbox/ws.service';
-import {Shot} from '../../sandbox/wsInterface';
+import {WsService} from '../../sandbox/ws.service';
+import {Shot, Shots} from '../../sandbox/wsInterface';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
@@ -11,25 +11,30 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 })
 export class ShotsComponent {
 
-  displayedColumns: string[] = ['focusTimeS', 'triggerTimeS', 'moveUp', 'moveDown', 'remove'];
-  shots: Shot[];
+  displayedColumns: string[] = ['focusTime', 'triggerTime', 'moveUp', 'moveDown', 'remove'];
+  shots: Shots;
 
-  constructor(private snackBar: MatSnackBar,private uiService: UiService, public wsService: WsService) {
-      wsService.shots.onChange(shots => {
-        this.shots = shots;
-        console.log('newShots',JSON.stringify(shots))
-        this.snackBar.open('Shots updated' + JSON.stringify(shots), null, {
-          duration: 2000
-        });
+  constructor(private snackBar: MatSnackBar, private uiService: UiService, public wsService: WsService) {
+    wsService.shots.onChange(shots => {
+      this.shots = new Shots(shots.shots); // we need a complete object
+      console.log('newShots', JSON.stringify(shots))
+      this.snackBar.open('Shots updated', null, {
+        duration: 2000
       });
+    });
   }
 
   editCell(shot: Shot, column: string) {
+    console.log('EDITCELL', shot, column, shot[column])
     this.uiService.editNumber(shot[column]).then(value => shot[column] = value);
   }
 
   isNotLastRow(i: number) {
-    return this.wsService.shots.getValue().length - 1 > i;
+    if (this.shots) {
+      return (this.shots.length() - 1) > i
+    } else {
+      return true;
+    }
   }
 
   moveUp(i: number) {
@@ -41,30 +46,14 @@ export class ShotsComponent {
   }
 
   move(oldIndex: number, newIndex: number) {
-    // const shotsCopy = [].concat(shots);
-    // if (newIndex >= shots.length) {
-    //   let k = newIndex - shots.length + 1;
-    //   while (k--) {
-    //     shots.push(undefined);
-    //   }
-    // }
-    // shots.splice(newIndex, 0, shots.splice(oldIndex, 1)[0]);
-    // this.wsService.shots.setValue([].concat(shots));
+    this.wsService.shots.setValue(this.shots.copy().move(oldIndex,newIndex));
   }
 
   remove(index: number) {
-    // const shots = this.wsService.shots.getValue();
-    // shots.splice(index, 1);
-    // this.wsService.shots.setValue([].concat(shots));
-    const shotsCopy = [].concat(this.shots);
-    shotsCopy.splice(index, 1);
-    this.wsService.shots.setValue(shotsCopy);
+    this.wsService.shots.setValue(this.shots.copy().remove(index));
   }
 
   add() {
-    const shotsCopy = [].concat(this.shots);
-    shotsCopy.push({focusTime: 0.0, triggerTime: 1.0});
-    console.log('shotsCopy',JSON.stringify(shotsCopy))
-    this.wsService.shots.setValue(shotsCopy);
+    this.wsService.shots.setValue(this.shots.copy().add({focusTime: 0.0, triggerTime: 1.0}));
   }
 }

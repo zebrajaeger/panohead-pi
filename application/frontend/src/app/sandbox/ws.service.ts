@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Client} from 'rpc-websockets';
 import {ClientValue} from '@zebrajaeger/ws-value';
-import {FOV, Overlap, PanoFOV, Shot, Status, Timing, wsNames} from './wsInterface';
+import {FOV, Overlap, PanoFOV, Shots, Status, Timing, wsNames} from './wsInterface';
 import * as store from 'store2';
 
 @Injectable({
@@ -15,7 +15,7 @@ export class WsService {
   readonly host: string;
 
   readonly timing: ClientValue<Timing>;
-  readonly shots: ClientValue<Shot[]>;
+  readonly shots: ClientValue<Shots>;
   readonly status: ClientValue<Status>;
   readonly jogging: ClientValue<boolean>;
   readonly panoFov: ClientValue<PanoFOV>;
@@ -38,7 +38,7 @@ export class WsService {
       this.sendConnectionChange();
     })
     this.timing = new ClientValue<Timing>(this.client, wsNames.TIMING);
-    this.shots = new ClientValue<Shot[]>(this.client, wsNames.SHOTS);
+    this.shots = new ClientValue<Shots>(this.client, wsNames.SHOTS);
     this.status = new ClientValue<Status>(this.client, wsNames.STATUS);
     this.jogging = new ClientValue<boolean>(this.client, wsNames.JOGGING);
     this.panoFov = new ClientValue<PanoFOV>(this.client, wsNames.PANO_FOV);

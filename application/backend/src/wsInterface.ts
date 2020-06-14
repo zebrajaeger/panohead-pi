@@ -14,6 +14,44 @@ export interface Shot {
     triggerTime: number;
 }
 
+export class Shots {
+    readonly shots: Shot[];
+
+    constructor(shots: Shot[]) {
+        this.shots = shots;
+    }
+
+    copy(): Shots {
+        return new Shots((<Shot[]>[]).concat(this.shots));
+    }
+
+    remove(index: number): Shots {
+        this.shots.splice(index, 1);
+        return this;
+    }
+
+    add(shot: Shot): Shots {
+        this.shots.push(shot);
+        return this;
+    }
+
+    length(): number {
+        return this.shots.length;
+    }
+
+    move(oldIndex: number, newIndex: number) : Shots {
+         if (newIndex >= this.shots.length) {
+           let k = newIndex - this.shots.length + 1;
+           while (k--) {
+             // @ts-ignore
+               this.shots.push(undefined);
+           }
+         }
+         this.shots.splice(newIndex, 0, this.shots.splice(oldIndex, 1)[0]);
+         return this;
+    }
+}
+
 // status
 export interface Axis {
     isAtPosition: boolean;
