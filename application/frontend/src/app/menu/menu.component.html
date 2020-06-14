@@ -75,5 +75,18 @@
       Jogging
     </button>
   </mat-menu>
+
+  <!-- Tools -->
+  <button  [matMenuTriggerFor]="configMenu"
+    mat-button routerLinkActive="active">
+    Config
+  </button>
+  <mat-menu #configMenu="matMenu" yPosition="above">
+    <!-- config/server -->
+    <button routerLink="/config/server"
+            mat-menu-item routerLinkActive="active">
+      Server
+    </button>
+  </mat-menu>
 </div>
 

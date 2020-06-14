@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {UiService} from '../../ui/ui.service';
 import { WsService} from '../../sandbox/ws.service';
 import {Shot} from '../../sandbox/wsInterface';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-shots',
@@ -13,12 +14,14 @@ export class ShotsComponent {
   displayedColumns: string[] = ['focusTimeS', 'triggerTimeS', 'moveUp', 'moveDown', 'remove'];
   shots: Shot[];
 
-  constructor(private uiService: UiService, public wsService: WsService) {
-    // wsService.onInitialized(() => {
-      wsService.shots.onChange(() => {
-        this.shots = wsService.shots.getValue();
+  constructor(private snackBar: MatSnackBar,private uiService: UiService, public wsService: WsService) {
+      wsService.shots.onChange(shots => {
+        this.shots = shots;
+        console.log('newShots',JSON.stringify(shots))
+        this.snackBar.open('Shots updated' + JSON.stringify(shots), null, {
+          duration: 2000
+        });
       });
-    // });
   }
 
   editCell(shot: Shot, column: string) {
@@ -61,6 +64,7 @@ export class ShotsComponent {
   add() {
     const shotsCopy = [].concat(this.shots);
     shotsCopy.push({focusTime: 0.0, triggerTime: 1.0});
+    console.log('shotsCopy',JSON.stringify(shotsCopy))
     this.wsService.shots.setValue(shotsCopy);
   }
 }

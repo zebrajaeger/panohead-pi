@@ -43,7 +43,7 @@ export class MotionComponent {
   edit(value: number): Promise<number> {
     return new Promise<number>(resolve => {
       const dialogRef = this.dialog.open(NumberDialogComponent, {
-        width: '250px',
+        width: '330px',
         data: value
       });
 

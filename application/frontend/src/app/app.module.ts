@@ -32,6 +32,9 @@ import { PanoRobotComponent } from './content/pano/pano-robot/pano-robot.compone
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { JoggingComponent } from './content/tools/jogging/jogging.component';
+import { ServerComponent } from './content/config/server/server.component';
+import {MatInputModule} from '@angular/material/input';
+import {MatFormFieldModule} from '@angular/material/form-field';
 
 @NgModule({
   declarations: [
@@ -50,7 +53,8 @@ import { JoggingComponent } from './content/tools/jogging/jogging.component';
     CameraComponent,
     PanoFovComponent,
     PanoRobotComponent,
-    JoggingComponent
+    JoggingComponent,
+    ServerComponent
   ],
   imports: [
     BrowserModule,
@@ -58,7 +62,8 @@ import { JoggingComponent } from './content/tools/jogging/jogging.component';
     BrowserAnimationsModule,
 
     MatMenuModule, MatIconModule, MatButtonModule, MatCardModule, MatTableModule,
-    MatDialogModule, MatGridListModule, MatSliderModule, MatSlideToggleModule, MatSnackBarModule
+    MatDialogModule, MatGridListModule, MatSliderModule, MatSlideToggleModule, MatSnackBarModule,
+    MatInputModule, MatFormFieldModule,
   ],
   providers: [
     WsService

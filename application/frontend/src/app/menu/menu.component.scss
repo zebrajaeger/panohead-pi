@@ -2,6 +2,10 @@
   background-color: white;
 }
 
+.mat-button,.mat-menu-item{
+  font-size: 2em;
+}
+
 .mat-button.active {
   background-color: lightgray;
 }

@@ -2,6 +2,10 @@
   margin: 5px 5px;
 }
 
+.mat-raised-button {
+  font-size: 2em;
+}
+
 .updown {
   padding: 0;
   min-width: 40px;
@@ -17,15 +21,38 @@
 }
 
 .calibration-card {
- display:flex;
+  display: flex;
   flex-direction: row;
   justify-content: space-between;
 }
 
 .calibrate {
   margin: 5px;
+  .mat-icon {
+    font-size: 50px;
+    width:50px;
+    height: 50px;
+  }
 }
 
-.rotat180{
-  transform:rotate(180deg);
+.rotat180 {
+  transform: rotate(180deg);
+}
+
+.pos-label, .pos-value {
+  font-size: 2em;
+  margin: 0 5px;
+}
+
+.pos-value {
+  font-weight: bold;
+}
+
+.slider:first-child {
+  margin-bottom: 10px;
+}
+
+.buttons {
+  display:flex;
+  justify-content: flex-end;
 }

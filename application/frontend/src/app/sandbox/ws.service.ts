@@ -2,26 +2,31 @@ import {Injectable} from '@angular/core';
 import {Client} from 'rpc-websockets';
 import {ClientValue} from '@zebrajaeger/ws-value';
 import {FOV, Overlap, PanoFOV, Shot, Status, Timing, wsNames} from './wsInterface';
+import * as store from 'store2';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WsService {
-
   private connectionListeners: ((connected: boolean) => void)[] = [];
   private isConnected: boolean;
   private readonly client: Client;
 
-  public readonly timing: ClientValue<Timing>;
-  public readonly shots: ClientValue<Shot[]>;
-  public readonly status: ClientValue<Status>;
-  public readonly jogging: ClientValue<boolean>;
-  public readonly panoFov: ClientValue<PanoFOV>;
-  public readonly imageFov: ClientValue<FOV>;
-  public readonly overlap: ClientValue<Overlap>;
+  readonly host: string;
+
+  readonly timing: ClientValue<Timing>;
+  readonly shots: ClientValue<Shot[]>;
+  readonly status: ClientValue<Status>;
+  readonly jogging: ClientValue<boolean>;
+  readonly panoFov: ClientValue<PanoFOV>;
+  readonly imageFov: ClientValue<FOV>;
+  readonly overlap: ClientValue<Overlap>;
 
   constructor() {
-    this.client = new Client('ws://192.168.178.69:8081', {max_reconnects: 0, reconnect_interval: 2500});
+    this.host = store.get('ph.host');
+    let h = 'ws://' + this.host;
+    console.log('connect to', h)
+    this.client = new Client(h, {max_reconnects: 0, reconnect_interval: 2500});
     this.client.on('open', () => {
       console.log('OPEN')
       this.isConnected = true;
@@ -39,6 +44,13 @@ export class WsService {
     this.panoFov = new ClientValue<PanoFOV>(this.client, wsNames.PANO_FOV);
     this.imageFov = new ClientValue<FOV>(this.client, wsNames.IMAGE_FOV);
     this.overlap = new ClientValue<Overlap>(this.client, wsNames.OVERLAP);
+  }
+
+  setHost(host: string, reload: boolean) {
+    store.set('ph.host', host);
+    if (reload) {
+      window.location.reload();
+    }
   }
 
   onConnected(l: ((connected: boolean) => void)) {

@@ -1,0 +1,12 @@
+<mat-card>
+  <mat-form-field>
+    <mat-label>Server ws://</mat-label>
+    <input matInput placeholder="127.0.0.1:8081" [value]="host" (change)="onHost($event)">
+  </mat-form-field>
+</mat-card>
+
+<mat-card>
+    <button mat-raised-button color="warn" (click)="reload()">
+      Set and reload
+    </button>
+</mat-card>

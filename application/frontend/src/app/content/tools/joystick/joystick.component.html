@@ -1,24 +1,21 @@
 <mat-card>
-  <div>Joystick Position: {{status?.joystick?.x}},{{status?.joystick?.y}}</div>
+  <div><span class="pos-label">Joystick Position:</span><span class="pos-value">{{status?.joystick?.x}},{{status?.joystick?.y}}</span></div>
 </mat-card>
 
 <mat-card class="calibration-card">
   <button class="calibrate" mat-raised-button color="warn" (click)="this.wsService.joystickCalibrateAsTopLeft()">
     <mat-icon>border_style</mat-icon>
-    Calibrate Upper-Left corner
   </button>
   <button class="calibrate" mat-raised-button color="warn" (click)="this.wsService.joystickCalibrateAsCenter()">
     <mat-icon>border_inner</mat-icon>
-    Calibrate Center corner
   </button>
   <button class="calibrate" mat-raised-button color="warn" (click)="this.wsService.joystickCalibrateAsBottomRight()">
     <mat-icon class="rotat180">border_style</mat-icon>
-    Calibrate Bottom-Right corner
   </button>
 </mat-card>
 
 <mat-card>
-  <div>
+  <div class="slider">
 
     X:
     <button class="updown" (click)="downX()" mat-raised-button>
@@ -37,7 +34,7 @@
     </button>
     : {{backlashX}}
   </div>
-  <div>
+  <div class="slider">
     Y:
     <button class="updown" (click)="downY()" mat-raised-button>
       <mat-icon>chevron_left</mat-icon>
@@ -55,7 +52,7 @@
     </button>
     : {{backlashY}}
   </div>
-  <div>
+  <div class="buttons">
     <button class="save" (click)="save()" mat-raised-button color="warn">
       Set
     </button>

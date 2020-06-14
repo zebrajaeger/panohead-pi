@@ -1,6 +1,6 @@
 <mat-card>
   <button mat-button (click)="add()"><mat-icon>add</mat-icon></button>
-  <table mat-table [dataSource]="wsService.shots?.getValue()" class="mat-elevation-z8 shots">
+  <table mat-table [dataSource]="shots" class="mat-elevation-z8 shots">
 
     <ng-container matColumnDef="focusTimeS">
       <th mat-header-cell *matHeaderCellDef> focusTime</th>

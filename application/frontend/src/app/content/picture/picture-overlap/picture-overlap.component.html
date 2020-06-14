@@ -2,16 +2,16 @@
   <mat-card-content>
     <table>
       <tr>
-        <td>Overlap X:</td>
+        <td class="label">Overlap X:</td>
         <td>
-          <button mat-button (click)="editOverlapX()">{{overlapX.toFixed(1)}} %</button>
+          <button mat-raised-button color="warn" (click)="editOverlapX()">{{overlapX.toFixed(1)}} %</button>
         </td>
       </tr>
 
       <tr>
-        <td>Overlap Y:</td>
+        <td class="label">Overlap Y:</td>
         <td>
-          <button mat-button (click)="editOverlapY()">{{overlapY.toFixed(1)}} %</button>
+          <button mat-raised-button color="warn" (click)="editOverlapY()">{{overlapY.toFixed(1)}} %</button>
         </td>
       </tr>
     </table>
