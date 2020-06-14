@@ -41,6 +41,11 @@ export class PanoCalc {
         this.listeners.push(cb);
     }
 
+    sendInvalidResult(){
+        // @ts-ignore
+        this.listeners.forEach(listener => listener(null))
+    }
+
     tryRecalculate(): void {
         console.log('tryRecalculate()', this.imageFov_.isPresent(), this.panoFov_.isPresent(), this.overlap_.isPresent())
         if (this.imageFov_.isPresent() && this.panoFov_.isPresent() && this.overlap_.isPresent()) {
@@ -48,17 +53,20 @@ export class PanoCalc {
             const fovi = this.imageFov_.get();
             if ((fovi.a.x === fovi.b.x) || (fovi.a.y === fovi.b.y)) {
                 console.log('rejected', 'fovi.a.x === fovi.b.x', fovi.a.x === fovi.b.x, 'fovi.a.y === fovi.b.y', fovi.a.y === fovi.b.y)
+                this.sendInvalidResult();
                 return;
             }
 
             const fovp = this.panoFov_.get();
             if ((fovp.a.y === fovp.b.y)) {
                 console.log('rejected', 'fovp.a.y === fovp.b.y', fovp.a.y === fovp.b.y)
+                this.sendInvalidResult();
                 return;
             }
 
             if (fovp.partial && (fovp.a.x === fovp.b.x)) {
                 console.log('rejected', 'fovp.partial && (fovp.a.x === fovi.b.x)', fovp.partial && (fovp.a.x === fovi.b.x))
+                this.sendInvalidResult();
                 return;
             }
 
