@@ -45,25 +45,30 @@ robot.onStop(() => {
 
 const panoCalc = new PanoCalc();
 panoCalc.onPano(p => pano.setValue(p));
+panoCalc.onPano(p => console.log(p));
 
 const timing = new PersistentValue<Timing>(server, config, wsNames.TIMING, {
     delayAfterMove: 0.0,
     delayBetweenShots: 0.0,
     delayAfterLastShot: 0.0
 })
-const shots = new PersistentValue<Shots>(server, config, wsNames.SHOTS, {shots:[{focusTime: 0.0, triggerTime: 1.0}]});
-shots.onChange(s => {
-    console.log('shots', s);
-})
+
+const shots = new PersistentValue<Shots>(server, config, wsNames.SHOTS, new Shots([{focusTime: 0.0, triggerTime: 1.0}]));
+
 const imageFov = new PersistentValue<FOV>(server, config, wsNames.IMAGE_FOV, {a: {x: 0, y: 0}, b: {x: 0, y: 0}});
+panoCalc.imageFov = imageFov.getValue();
 imageFov.onChange(v => panoCalc.imageFov = v)
+
 const overlap = new PersistentValue<Overlap>(server, config, wsNames.OVERLAP, {x: 30, y: 30});
+panoCalc.overlap = overlap.getValue();
 overlap.onChange(v => panoCalc.overlap = v)
+
 const panoFov = new PersistentValue<PanoFOV>(server, config, wsNames.PANO_FOV, {
     a: {x: 0, y: 0},
     b: {x: 0, y: 0},
     partial: true
 });
+panoCalc.panoFov = panoFov.getValue();
 panoFov.onChange(v => panoCalc.panoFov = v)
 
 // callbacks
@@ -94,3 +99,4 @@ setInterval(() => {
 }, 20);
 
 LOG.info('Server started');
+
