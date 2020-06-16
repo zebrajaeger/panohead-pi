@@ -117,7 +117,7 @@ public:
             //Serial.print("cmd_pos_axis_1_available: ");
             //Serial.println(cmd_pos_axis_0_pos.int32);
             tmc429_.setSoftMode(1);
-            tmc429_.setTargetPosition(1, cmd_pos_axis_0_pos.int32);
+            tmc429_.setTargetPosition(1, cmd_pos_axis_1_pos.int32);
             cmd_pos_axis_1_available = false;
         }
     }
@@ -176,27 +176,6 @@ public:
         tmc429_.setLimitsInHz(axisIndex.uint8, limit.velocityMinHz, limit.velocityMaxHz, limit.acceleration_max_hz_per_s);
     }
 
-/*
-    //------------------------------------------------------------------------------
-    bool isMoving(const uint8_t axisIndex) const
-    //------------------------------------------------------------------------------
-    {
-        return steppers_[axisIndex].speed.uint32 != 0;
-    }
-
-    //------------------------------------------------------------------------------
-    const u32_t &getPos(const uint8_t axisIndex) const
-    //------------------------------------------------------------------------------
-    {
-        return steppers_[axisIndex].pos;
-    }
-    //------------------------------------------------------------------------------
-    const u32_t &getSpeed(const uint8_t axisIndex) const
-    //------------------------------------------------------------------------------
-    {
-        return steppers_[axisIndex].speed;
-    }
-*/
     //------------------------------------------------------------------------------
     const Stepper_t &getStepper(const uint8_t axisIndex) const
     //------------------------------------------------------------------------------
@@ -226,6 +205,14 @@ public:
         res.fields.isMoving2 = steppers_[2].speed.uint16 != 0;
 
         return res;
+    }
+
+    void statistic(){
+        Serial.print("Steppers: {0:");
+        Serial.print(steppers_[0].pos.uint32);
+        Serial.print(",1:");
+        Serial.print(steppers_[1].pos.uint32);
+        Serial.println("}");
     }
 
 private:

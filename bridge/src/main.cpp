@@ -45,6 +45,7 @@ class StatisticTimer : public IntervalTimer
     virtual void onTimer()
     {
         joystick.dumpValue();
+        stepperDriver.statistic();
     }
 };
 StatisticTimer statisticTimer;
@@ -55,14 +56,14 @@ void requestEvent()
 {
     const StepperDriver::Stepper_t &s1 = stepperDriver.getStepper(0);
     const StepperDriver::Stepper_t &s2 = stepperDriver.getStepper(1);
-    WireUtils::write8(stepperDriver.getMovementStatus().u8); // 1
-    WireUtils::write24(s1.pos);                              // 3
-    WireUtils::write16(s1.speed);                            // 2
-    WireUtils::write24(s2.pos);                              // 3
-    WireUtils::write16(s2.speed);                            // 2
-    WireUtils::write16(joystick.getX().pos);                 // 2
-    WireUtils::write16(joystick.getY().pos);                 // 2
-    WireUtils::write8(camera.getStatus().u8);                // 1
+    WireUtils::write8(stepperDriver.getMovementStatus().u8); // 1  i:0
+    WireUtils::write24(s1.pos);                              // 3  i:1
+    WireUtils::write16(s1.speed);                            // 2  i:4
+    WireUtils::write24(s2.pos);                              // 3  i:6
+    WireUtils::write16(s2.speed);                            // 2  i:9
+    WireUtils::write16(joystick.getX().pos);                 // 2  i:11
+    WireUtils::write16(joystick.getY().pos);                 // 2  i:13
+    WireUtils::write8(camera.getStatus().u8);                // 1  i:15
     //                                                      -------
     //                                                         16
 }
