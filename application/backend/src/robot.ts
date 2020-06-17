@@ -1,6 +1,9 @@
 import {Pano, Shot, Shots, Timing} from './wsInterface';
 import {Optional} from 'typescript-optional';
 
+const log4js = require("log4js");
+const LOG = log4js.getLogger('server');
+
 export enum State {
     INITIALIZED,
     MOVING,
@@ -87,6 +90,7 @@ export class Robot {
             this.timing = Optional.of(timing);
             this.shots = Optional.of(shots);
             if (this.pano.isPresent() && this.timing.isPresent() && this.shots.isPresent()) {
+                LOG.debug('start');
                 this.shotIndex = 0;
                 this.resetPos();
                 this.setState(State.MOVING);
@@ -96,41 +100,81 @@ export class Robot {
     }
 
     pauseResume() {
+        LOG.debug('pauseResume');
         // TODO
     }
 
+    private notifyStateListener(newState: State, previousState: State) {
+        LOG.debug(`notifyStateListener(${this.stateToName(previousState)} -> ${this.stateToName(newState)})`);
+        this.stateListeners.forEach(cb => cb(newState, previousState))
+    }
+
     stop() {
-        this.stopListeners.forEach(cb => cb());
+        LOG.debug('stop');
+        this.notifyStopListeners();
         this.setState(State.FINISHED);
     }
 
+    private notifyStopListeners() {
+        LOG.debug('notifyStopListeners()');
+        this.stopListeners.forEach(cb => cb());
+    }
+
     triggerPositionReached() {
+        LOG.debug('triggerPositionReached');
         if (this.state === State.MOVING) {
             this.setState(State.WAITING_BEFORE_SHOT);
-            this.startTimer(this.timing.get().delayAfterMove);
+            this.startTimer(this.timing.get().delayAfterMove * 1000);
         }
     }
 
+    private notifyMoveToListeners(x: number, y: number) {
+        LOG.debug(`notifyMoveToListeners(${x}, ${y})`);
+        this.moveToListeners.forEach(cb => cb(x, y));
+    }
+
+
     triggerShotDone() {
+        LOG.debug('triggerShotDone');
         if (this.state === State.SHOOTING) {
             if (this.hasNextShot()) {
                 this.setState(State.WAITING_BETWEEN_SHOTS);
-                this.startTimer(this.timing.get().delayBetweenShots);
+                this.startTimer(this.timing.get().delayBetweenShots * 1000);
             } else {
                 this.setState(State.WAITING_AFTER_LAST_SHOT);
-                this.startTimer(this.timing.get().delayAfterLastShot);
+                this.startTimer(this.timing.get().delayAfterLastShot * 1000);
             }
         }
     }
 
+    private notifyShotListeners(focusMs: number, triggerMs: number) {
+        LOG.debug(`notifyShotListeners(${focusMs}, ${triggerMs})`);
+        this.shotListeners.forEach(cb => cb(focusMs, triggerMs));
+    }
+
+
+    getState(): State {
+        return this.state;
+    }
+
+    getStateName(): string {
+        return this.stateToName(this.state);
+    }
+
+    stateToName(s: State): string {
+        return State[s];
+    }
+
     private setState(newState: State): State {
+        LOG.debug(`newState: ${this.getStateName()} -> ${this.stateToName(newState)}`);
         let previousState = this.state;
         this.state = newState;
-        this.stateListeners.forEach(cb => cb(newState, previousState))
+        this.notifyStateListener(newState, previousState);
         return previousState;
     }
 
     private resetPos() {
+        LOG.debug('resetPos');
         if (this.pano.isPresent()) {
             this.position = Optional.of(new Position(this.pano.get().x.length, this.pano.get().y.length, 0, 0));
         }
@@ -141,6 +185,7 @@ export class Robot {
     }
 
     private incrementPos() {
+        LOG.debug('incrementPos');
         if (this.position.isPresent()) {
             this.position = this.position.get().nextPos();
         }
@@ -149,10 +194,11 @@ export class Robot {
     private moveToPos(): void {
         let x = this.pano.get().x[this.position.get().x];
         let y = this.pano.get().y[this.position.get().y];
-        this.moveToListeners.forEach(cb => cb(x, y));
+        this.notifyMoveToListeners(x, y);
     }
 
     private resetShot() {
+        LOG.debug('resetShot');
         this.shotIndex = 0;
     }
 
@@ -161,6 +207,7 @@ export class Robot {
     }
 
     private nextShot(): Optional<Shot> {
+        LOG.debug('nextShot');
         if (this.hasNextShot()) {
             return Optional.of(this.shots.get().shots[this.shotIndex++]);
         } else {
@@ -169,17 +216,19 @@ export class Robot {
     }
 
     private takeShot() {
+        LOG.debug('takeShot');
         let s = this.nextShot();
         if (s.isPresent()) {
             this.setState(State.SHOOTING);
-            this.shotListeners.forEach(cb => cb(s.get().focusTime, s.get().triggerTime));
+            this.notifyShotListeners(s.get().focusTime * 1000, s.get().triggerTime * 1000);
         } else {
             this.setState(State.WAITING_AFTER_LAST_SHOT);
-            this.startTimer(this.timing.get().delayAfterLastShot)
+            this.startTimer(this.timing.get().delayAfterLastShot * 1000)
         }
     }
 
     private onTimer() {
+        LOG.debug(`onTimer, state=${this.getStateName()}`);
         if (this.state === State.WAITING_BEFORE_SHOT) {
             this.resetShot();
             this.takeShot();
@@ -197,6 +246,7 @@ export class Robot {
     }
 
     private startTimer(ms: number) {
-        setTimeout(this.onTimer, ms);
+        LOG.debug(`startTimer(${ms})`);
+        setTimeout(() => this.onTimer(), ms);
     }
 }

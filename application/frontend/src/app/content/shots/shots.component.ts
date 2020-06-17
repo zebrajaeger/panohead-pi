@@ -15,18 +15,24 @@ export class ShotsComponent {
   shots: Shots;
 
   constructor(private snackBar: MatSnackBar, private uiService: UiService, public wsService: WsService) {
-    wsService.shots.onChange(shots => {
-      this.shots = new Shots(shots.shots); // we need a complete object
-      console.log('newShots', JSON.stringify(shots))
-      this.snackBar.open('Shots updated', null, {
-        duration: 2000
-      });
+    wsService.shots.onInit(shots => this.setShots(shots));
+    wsService.shots.onChange(shots => this.setShots(shots));
+  }
+
+  private setShots(shots: Shots){
+      this.shots= new Shots(shots.shots);
+    this.snackBar.open('Shots updated', null, {
+      duration: 2000
     });
   }
 
-  editCell(shot: Shot, column: string) {
-    console.log('EDITCELL', shot, column, shot[column])
-    this.uiService.editNumber(shot[column]).then(value => shot[column] = value);
+  editCell(index: number, column: string) {
+    let copy = JSON.parse(JSON.stringify(this.shots));
+    console.log('EDITCELL', {index,column}, copy.shots)
+    this.uiService.editNumber(copy.shots[index][column]).then(value => {
+      copy.shots[index][column] = value;
+      this.wsService.shots.setValue(copy);
+    } );
   }
 
   isNotLastRow(i: number) {

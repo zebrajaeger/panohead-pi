@@ -110,4 +110,5 @@ export const wsNames = {
     PANO_FOV: 'panoFov',
     OVERLAP: 'overlap',
     PANO: 'pano',
+    ROBOT_STATE: 'robotState',
 }

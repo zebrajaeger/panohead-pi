@@ -1,7 +1,17 @@
 .mat-card {
-  margin: 5px 5px;
+  margin: 5px;
+}
+
+.mat-raised-button{
+  margin:5px 10px;
 }
 
 .moving {
-  background-color: yellow;
+  background-color: red;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }

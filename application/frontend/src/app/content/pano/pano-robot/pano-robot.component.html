@@ -1,23 +1,43 @@
 <mat-card>
   ImageFOV
-  <div>a.x:{{imageFov?.a.x}} a.y:{{imageFov?.b.x}} = {{imageFov?.a.x - imageFov?.b.x}}</div>
-  <div>a.y:{{imageFov?.a.y}} b.y:{{imageFov?.b.y}} = {{imageFov?.a.y - imageFov?.b.y}}</div>
+  |
+  a.x:{{imageFov?.a.x}} a.y:{{imageFov?.b.x}} = {{imageFov?.a.x - imageFov?.b.x}}
+  |
+  a.y:{{imageFov?.a.y}} b.y:{{imageFov?.b.y}} = {{imageFov?.a.y - imageFov?.b.y}}
 </mat-card>
 
 <mat-card>
   PanoFOV (partial:{{panoFov?.partial}})
-  <div>a.x:{{panoFov?.a.x}} b.x:{{panoFov?.b.x}} = {{panoFov?.a.x - panoFov?.b.x}} </div>
-  <div>a.y:{{panoFov?.a.y}} b.y:{{panoFov?.b.y}} = {{panoFov?.a.y - panoFov?.b.y}}</div>
+  |
+  a.x:{{panoFov?.a.x}} b.x:{{panoFov?.b.x}} = {{panoFov?.a.x - panoFov?.b.x}}
+  |
+  a.y:{{panoFov?.a.y}} b.y:{{panoFov?.b.y}} = {{panoFov?.a.y - panoFov?.b.y}}
 </mat-card>
 
 <mat-card>
   Pano
-  <div>x:{{pano?.x}} -> nx:{{pano?.x.length}}</div>
-  <div>y:{{pano?.y}} -> ny:{{pano?.y.length}}</div>
+  |
+  x:{{pano?.x}} -> nx:{{pano?.x.length}}
+  |
+  y:{{pano?.y}} -> ny:{{pano?.y.length}}
 </mat-card>
 
 <mat-card>
-  Robot:
-  x:<span [class.moving] = "status?.actor.x.isMoving">{{status?.actor.x.position}}</span>
-  y:<span [class.moving] = "status?.actor.y.isMoving">{{status?.actor.y.position}}</span>
+  Robot |
+  x:<span [class.moving]="status?.actor.x.isMoving">{{status?.actor.x.position}}</span>
+  |
+  y:<span [class.moving]="status?.actor.y.isMoving">{{status?.actor.y.position}}</span>
+</mat-card>
+
+<mat-card>
+    {{robotState}}
+  <div class="buttons">
+    <button mat-raised-button (click)="start()">
+      <mat-icon>play_arrow</mat-icon> Start
+<!--      <mat-icon>pause</mat-icon> Pause/Resume-->
+    </button>
+    <button mat-raised-button (click)="stop()">
+      <mat-icon>stop</mat-icon> Stop
+    </button>
+  </div>
 </mat-card>

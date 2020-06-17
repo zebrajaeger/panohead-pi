@@ -18,12 +18,11 @@ export class AppComponent {
           (e.url === '/picture/fov')
           || (e.url === '/pano/fov')
           || (e.url === '/tools/jog')
-          || (e.url === '/pano/robot')
+          //|| (e.url === '/pano/robot')
         ;
         wsService.jogging.setValue(jogging);
         console.log('SET JOGGING', jogging)
       }
     })
   }
-
 }

@@ -22,6 +22,7 @@ export class WsService {
   readonly imageFov: ClientValue<FOV>;
   readonly overlap: ClientValue<Overlap>;
   readonly pano: ClientValue<Pano>;
+  readonly robotState: ClientValue<string>;
 
   constructor() {
     this.host = store.get('ph.host');
@@ -46,6 +47,7 @@ export class WsService {
     this.imageFov = new ClientValue<FOV>(this.client, wsNames.IMAGE_FOV);
     this.overlap = new ClientValue<Overlap>(this.client, wsNames.OVERLAP);
     this.pano = new ClientValue<Pano>(this.client, wsNames.PANO);
+    this.robotState = new ClientValue<string>(this.client, wsNames.ROBOT_STATE);
   }
 
   setHost(host: string, reload: boolean) {
@@ -95,5 +97,15 @@ export class WsService {
 
   cameraStartShot(focusMs: number, triggerMs: number) {
     return this.client.call('cameraStartShot', {focusMs, triggerMs});
+  }
+
+  panoStart() {
+    return this.client.call('panoStart', {});
+  }
+  panoStop() {
+    return this.client.call('panoStop', {});
+  }
+  panoPauseResume() {
+    return this.client.call('panoPauseResume', {});
   }
 }
